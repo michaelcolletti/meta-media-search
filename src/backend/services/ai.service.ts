@@ -65,9 +65,7 @@ Response: {
           messages: [{ role: 'user', content: userMessage }],
         });
 
-        responseText = response.content[0].type === 'text'
-          ? response.content[0].text
-          : '';
+        responseText = response.content[0].type === 'text' ? response.content[0].text : '';
       } else if (this.openai) {
         const response = await this.openai.chat.completions.create({
           model: config.AI_MODEL,

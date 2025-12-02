@@ -22,12 +22,12 @@ describe('AI Recommendation Engine', () => {
         return [
           { id: 'item-1', score: 0.95, reason: 'Based on viewing history' },
           { id: 'item-2', score: 0.87, reason: 'Similar to liked items' },
-          { id: 'item-3', score: 0.82, reason: 'Popular in your category' }
+          { id: 'item-3', score: 0.82, reason: 'Popular in your category' },
         ];
       },
       updateModel: async (userId, feedback) => {
         return { updated: true, newAccuracy: 0.91 };
-      }
+      },
     };
   });
 
@@ -37,7 +37,7 @@ describe('AI Recommendation Engine', () => {
       const interactions = [
         { itemId: 'item-1', action: 'view', timestamp: Date.now() - 1000 },
         { itemId: 'item-2', action: 'like', timestamp: Date.now() - 500 },
-        { itemId: 'item-3', action: 'share', timestamp: Date.now() }
+        { itemId: 'item-3', action: 'share', timestamp: Date.now() },
       ];
 
       const result = await recommendationEngine.train(userId, interactions);
@@ -48,9 +48,7 @@ describe('AI Recommendation Engine', () => {
 
     it('should handle insufficient training data', async () => {
       const userId = 'new-user';
-      const interactions = [
-        { itemId: 'item-1', action: 'view', timestamp: Date.now() }
-      ];
+      const interactions = [{ itemId: 'item-1', action: 'view', timestamp: Date.now() }];
 
       const result = await recommendationEngine.train(userId, interactions);
 
@@ -78,9 +76,7 @@ describe('AI Recommendation Engine', () => {
 
       // Verify scores are in descending order
       for (let i = 1; i < recommendations.length; i++) {
-        expect(recommendations[i - 1].score).toBeGreaterThanOrEqual(
-          recommendations[i].score
-        );
+        expect(recommendations[i - 1].score).toBeGreaterThanOrEqual(recommendations[i].score);
       }
     });
 
@@ -89,7 +85,7 @@ describe('AI Recommendation Engine', () => {
       const context = {
         category: 'video',
         excludeViewed: true,
-        minRelevance: 0.8
+        minRelevance: 0.8,
       };
 
       const recommendations = await recommendationEngine.predict(userId, context);
@@ -115,7 +111,7 @@ describe('AI Recommendation Engine', () => {
       const feedback = {
         itemId: 'item-1',
         action: 'like',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       const result = await recommendationEngine.updateModel(userId, feedback);
@@ -132,7 +128,7 @@ describe('AI Recommendation Engine', () => {
       const feedback = {
         itemId: 'item-1',
         action: 'like',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       const updateResult = await recommendationEngine.updateModel(userId, feedback);
@@ -155,9 +151,7 @@ describe('AI Recommendation Engine', () => {
     it('should handle concurrent prediction requests', async () => {
       const userIds = Array.from({ length: 10 }, (_, i) => `user-${i}`);
 
-      const promises = userIds.map(userId =>
-        recommendationEngine.predict(userId)
-      );
+      const promises = userIds.map(userId => recommendationEngine.predict(userId));
 
       const results = await Promise.all(promises);
 

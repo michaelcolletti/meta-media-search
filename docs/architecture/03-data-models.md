@@ -269,11 +269,11 @@ interface Query {
 }
 
 enum QueryIntent {
-  SEARCH = 'search',           // Find specific content
-  EXPLORE = 'explore',         // Browse broadly
+  SEARCH = 'search', // Find specific content
+  EXPLORE = 'explore', // Browse broadly
   RECOMMENDATION = 'recommend', // "Show me something like X"
-  FILTER = 'filter',           // Refine previous results
-  AVAILABILITY = 'availability' // "What's on Netflix?"
+  FILTER = 'filter', // Refine previous results
+  AVAILABILITY = 'availability', // "What's on Netflix?"
 }
 
 interface Entity {
@@ -292,7 +292,7 @@ enum EntityType {
   YEAR = 'year',
   RATING = 'rating',
   MOOD = 'mood',
-  TITLE = 'title'
+  TITLE = 'title',
 }
 
 interface FilterSet {
@@ -416,7 +416,7 @@ enum RelationshipType {
   SIMILAR_MOOD = 'mood',
   RECOMMENDATION = 'recommended',
   TEMPORAL = 'same_year',
-  PLATFORM = 'same_platform'
+  PLATFORM = 'same_platform',
 }
 
 enum LayoutAlgorithm {
@@ -425,7 +425,7 @@ enum LayoutAlgorithm {
   RADIAL = 'radial',
   CLUSTER = 'cluster',
   CIRCULAR = 'circular',
-  TIMELINE = 'timeline'
+  TIMELINE = 'timeline',
 }
 ```
 
@@ -487,7 +487,7 @@ enum RecommendationType {
   NEW_ARRIVAL = 'new', // Recently added content
   WATCHLIST = 'watchlist', // From user's watchlist
   SOCIAL = 'social', // What friends are watching
-  SERENDIPITY = 'serendipity' // Intentionally different
+  SERENDIPITY = 'serendipity', // Intentionally different
 }
 ```
 
@@ -552,7 +552,7 @@ enum EventType {
 
   // Error Events
   ERROR_OCCURRED = 'error',
-  SLOW_QUERY = 'slow_query'
+  SLOW_QUERY = 'slow_query',
 }
 
 // Example event payloads
@@ -593,6 +593,7 @@ interface MapRenderedEvent {
 ## Embedding Strategy
 
 ### Content Embedding
+
 Generate semantic vectors that capture meaning beyond keywords.
 
 ```typescript
@@ -604,15 +605,18 @@ async function generateContentEmbedding(content: MediaContent): Promise<number[]
     content.genres.map(g => g.name).join(' '),
     content.themes.map(t => t.name).join(' '),
     content.moods.map(m => m.name).join(' '),
-    content.cast.slice(0, 3).map(c => c.person.name).join(' '),
-    content.directors.map(d => d.name).join(' ')
+    content.cast
+      .slice(0, 3)
+      .map(c => c.person.name)
+      .join(' '),
+    content.directors.map(d => d.name).join(' '),
   ].join('. ');
 
   // Generate embedding with OpenAI
   const embedding = await openai.createEmbedding({
     model: 'text-embedding-3-large',
     input: text,
-    dimensions: 1536
+    dimensions: 1536,
   });
 
   return embedding.data[0].embedding;
@@ -620,6 +624,7 @@ async function generateContentEmbedding(content: MediaContent): Promise<number[]
 ```
 
 ### User Embedding
+
 Create a vector representation of user taste.
 
 ```typescript
@@ -643,6 +648,7 @@ async function generateUserEmbedding(user: User): Promise<number[]> {
 ```
 
 ### Query Embedding
+
 Transform natural language queries into semantic vectors.
 
 ```typescript
@@ -658,7 +664,7 @@ async function generateQueryEmbedding(query: string): Promise<number[]> {
   const embedding = await openai.createEmbedding({
     model: 'text-embedding-3-large',
     input: expanded,
-    dimensions: 1536
+    dimensions: 1536,
   });
 
   return embedding.data[0].embedding;
@@ -706,12 +712,14 @@ LIMIT 10
 ```
 
 ### When to Use Graph DB
+
 - **Complex relationship traversals** (6+ degrees of separation)
 - **Real-time collaborative filtering** (user similarity networks)
 - **Path finding** (content connection explanations)
 - **Social features** (friend-of-friend recommendations)
 
 **Trade-offs:**
+
 - ✅ Faster relationship queries
 - ✅ More expressive query language (Cypher)
 - ❌ Additional infrastructure complexity
@@ -726,15 +734,23 @@ LIMIT 10
 ```typescript
 const ContentSchema = z.object({
   title: z.string().min(1).max(500),
-  year: z.number().int().min(1888).max(new Date().getFullYear() + 2),
+  year: z
+    .number()
+    .int()
+    .min(1888)
+    .max(new Date().getFullYear() + 2),
   rating: z.number().min(0).max(10).optional(),
   genres: z.array(z.object({ id: z.number(), name: z.string() })).min(1),
   synopsis: z.string().min(10).max(5000),
-  platforms: z.array(z.object({
-    platform: z.object({ id: z.string(), name: z.string() }),
-    available: z.boolean()
-  })).min(1),
-  embedding: z.array(z.number()).length(1536)
+  platforms: z
+    .array(
+      z.object({
+        platform: z.object({ id: z.string(), name: z.string() }),
+        available: z.boolean(),
+      })
+    )
+    .min(1),
+  embedding: z.array(z.number()).length(1536),
 });
 
 // Data quality score
@@ -749,7 +765,7 @@ function calculateDataQuality(content: Partial<MediaContent>): number {
     hasCast: (content.cast?.length || 0) > 2 ? 1 : 0,
     hasDirector: (content.directors?.length || 0) > 0 ? 1 : 0,
     hasPlatforms: (content.platforms?.length || 0) > 0 ? 1 : 0,
-    hasEmbedding: (content.embedding?.length || 0) === 1536 ? 1 : 0
+    hasEmbedding: (content.embedding?.length || 0) === 1536 ? 1 : 0,
   };
 
   const total = Object.values(scores).reduce((a, b) => a + b, 0);
@@ -761,10 +777,10 @@ function calculateDataQuality(content: Partial<MediaContent>): number {
 
 ```typescript
 enum DataFreshness {
-  STALE = 'stale',       // >7 days old
-  AGING = 'aging',       // 1-7 days old
-  FRESH = 'fresh',       // <1 day old
-  REAL_TIME = 'realtime' // <1 hour old
+  STALE = 'stale', // >7 days old
+  AGING = 'aging', // 1-7 days old
+  FRESH = 'fresh', // <1 day old
+  REAL_TIME = 'realtime', // <1 hour old
 }
 
 interface RefreshStrategy {
@@ -786,18 +802,14 @@ const refreshStrategies: RefreshStrategy[] = [
     contentType: 'availability',
     priority: 'high',
     interval: 1, // Hourly
-    conditions: [
-      { type: 'popularity', threshold: 80, action: 'prioritize' }
-    ]
+    conditions: [{ type: 'popularity', threshold: 80, action: 'prioritize' }],
   },
   {
     contentType: 'metadata',
     priority: 'low',
     interval: 168, // Weekly
-    conditions: [
-      { type: 'recent_views', threshold: 0, action: 'skip' }
-    ]
-  }
+    conditions: [{ type: 'recent_views', threshold: 0, action: 'skip' }],
+  },
 ];
 ```
 

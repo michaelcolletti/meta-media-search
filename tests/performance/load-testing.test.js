@@ -13,14 +13,14 @@ describe('Load Testing', () => {
       const concurrentUsers = 100;
       const searchQueries = Array.from({ length: concurrentUsers }, (_, i) => ({
         query: `test query ${i}`,
-        userId: `user-${i}`
+        userId: `user-${i}`,
       }));
 
       const startTime = performance.now();
 
       const promises = searchQueries.map(({ query, userId }) =>
         fetch(`${API_BASE}/api/search?q=${encodeURIComponent(query)}`, {
-          headers: { 'X-User-ID': userId }
+          headers: { 'X-User-ID': userId },
         }).catch(() => ({ ok: false }))
       );
 
@@ -45,7 +45,7 @@ describe('Load Testing', () => {
 
       const promises = Array.from({ length: concurrentUsers }, (_, i) =>
         fetch(`${API_BASE}/api/recommendations`, {
-          headers: { 'X-User-ID': `user-${i}` }
+          headers: { 'X-User-ID': `user-${i}` },
         }).catch(() => ({ ok: false }))
       );
 
@@ -81,14 +81,14 @@ describe('Load Testing', () => {
             results.push({
               success: response.ok,
               responseTime,
-              timestamp: Date.now()
+              timestamp: Date.now(),
             });
           })
           .catch(() => {
             results.push({
               success: false,
               responseTime: performance.now() - requestStartTime,
-              timestamp: Date.now()
+              timestamp: Date.now(),
             });
           });
 
@@ -198,8 +198,9 @@ describe('Load Testing', () => {
         let success = false;
 
         for (let attempt = 0; attempt < attempts; attempt++) {
-          const response = await fetch(`${API_BASE}/api/search?q=test${i}`)
-            .catch(() => ({ ok: false }));
+          const response = await fetch(`${API_BASE}/api/search?q=test${i}`).catch(() => ({
+            ok: false,
+          }));
 
           if (response.ok) {
             success = true;

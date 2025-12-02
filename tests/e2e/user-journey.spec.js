@@ -163,7 +163,7 @@ test.describe('Error Handling', () => {
 
     // Verify timeout handling (if response takes too long)
     await page.waitForSelector('[data-testid="search-results"], [data-testid="error-message"]', {
-      timeout: 30000
+      timeout: 30000,
     });
   });
 });

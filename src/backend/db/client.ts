@@ -21,7 +21,7 @@ class DatabaseClient {
       logger.info('New database connection established');
     });
 
-    this.pool.on('error', (err) => {
+    this.pool.on('error', err => {
       logger.error({ err }, 'Unexpected database pool error');
     });
   }
@@ -45,19 +45,25 @@ class DatabaseClient {
       const result = await this.pool.query<T>(text, params);
       const duration = Date.now() - start;
 
-      logger.debug({
-        query: text,
-        duration,
-        rows: result.rowCount,
-      }, 'Database query executed');
+      logger.debug(
+        {
+          query: text,
+          duration,
+          rows: result.rowCount,
+        },
+        'Database query executed'
+      );
 
       return result;
     } catch (error) {
-      logger.error({
-        err: error,
-        query: text,
-        params,
-      }, 'Database query error');
+      logger.error(
+        {
+          err: error,
+          query: text,
+          params,
+        },
+        'Database query error'
+      );
       throw new DatabaseError('Query execution failed');
     }
   }

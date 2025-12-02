@@ -2,18 +2,18 @@ import { Request, Response } from 'express';
 import userModel from '../models/user.model.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { generateToken, AuthRequest } from '../middleware/auth.js';
-import { userRegistrationSchema, userLoginSchema, userPreferencesSchema } from '../utils/validators.js';
+import {
+  userRegistrationSchema,
+  userLoginSchema,
+  userPreferencesSchema,
+} from '../utils/validators.js';
 import { AuthenticationError, ValidationError } from '../utils/errors.js';
 import logger from '../utils/logger.js';
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const validated = userRegistrationSchema.parse(req.body);
 
-  const user = await userModel.create(
-    validated.email,
-    validated.password,
-    validated.name
-  );
+  const user = await userModel.create(validated.email, validated.password, validated.name);
 
   const token = generateToken({
     id: user.id,

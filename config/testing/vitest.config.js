@@ -17,24 +17,24 @@ export default defineConfig({
         '**/*.config.js',
         '**/*.config.ts',
         '**/dist/**',
-        '**/.next/**'
+        '**/.next/**',
       ],
       thresholds: {
         lines: 80,
         functions: 80,
         branches: 75,
-        statements: 80
-      }
+        statements: 80,
+      },
     },
     include: ['tests/unit/**/*.{test,spec}.{js,jsx,ts,tsx}'],
     exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
     testTimeout: 10000,
-    hookTimeout: 10000
+    hookTimeout: 10000,
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, '../../src'),
-      '@tests': resolve(__dirname, '../../tests')
-    }
-  }
+      '@tests': resolve(__dirname, '../../tests'),
+    },
+  },
 });

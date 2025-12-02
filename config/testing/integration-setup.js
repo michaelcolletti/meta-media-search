@@ -9,7 +9,7 @@ beforeAll(async () => {
   mockDb = {
     connected: true,
     query: async (sql, params) => ({ rows: [], rowCount: 0 }),
-    transaction: async (callback) => callback(mockDb)
+    transaction: async callback => callback(mockDb),
   };
 });
 
@@ -39,6 +39,6 @@ export const createMockData = (count = 10) => {
     id: `test-${i}`,
     title: `Test Item ${i}`,
     description: `Test description ${i}`,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   }));
 };

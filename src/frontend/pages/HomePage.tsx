@@ -85,10 +85,42 @@ export function HomePage() {
               </linearGradient>
             </defs>
             {/* Sample graph visualization */}
-            <line x1="200" y1="200" x2="300" y2="150" stroke="url(#grad1)" strokeWidth="2" opacity="0.3" />
-            <line x1="200" y1="200" x2="100" y2="150" stroke="url(#grad1)" strokeWidth="2" opacity="0.3" />
-            <line x1="200" y1="200" x2="250" y2="300" stroke="url(#grad2)" strokeWidth="2" opacity="0.3" />
-            <line x1="200" y1="200" x2="150" y2="300" stroke="url(#grad2)" strokeWidth="2" opacity="0.3" />
+            <line
+              x1="200"
+              y1="200"
+              x2="300"
+              y2="150"
+              stroke="url(#grad1)"
+              strokeWidth="2"
+              opacity="0.3"
+            />
+            <line
+              x1="200"
+              y1="200"
+              x2="100"
+              y2="150"
+              stroke="url(#grad1)"
+              strokeWidth="2"
+              opacity="0.3"
+            />
+            <line
+              x1="200"
+              y1="200"
+              x2="250"
+              y2="300"
+              stroke="url(#grad2)"
+              strokeWidth="2"
+              opacity="0.3"
+            />
+            <line
+              x1="200"
+              y1="200"
+              x2="150"
+              y2="300"
+              stroke="url(#grad2)"
+              strokeWidth="2"
+              opacity="0.3"
+            />
             <circle cx="200" cy="200" r="30" fill="url(#grad1)" />
             <circle cx="300" cy="150" r="20" fill="url(#grad2)" />
             <circle cx="100" cy="150" r="20" fill="url(#grad1)" />

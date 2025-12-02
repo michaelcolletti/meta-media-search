@@ -1,18 +1,31 @@
 import { z } from 'zod';
-import { SearchQuery, SearchFilters, RecommendationRequest, UserPreferences } from '@types/index.js';
+import {
+  SearchQuery,
+  SearchFilters,
+  RecommendationRequest,
+  UserPreferences,
+} from '@types/index.js';
 
 export const searchQuerySchema = z.object({
   query: z.string().min(1).max(500),
   userId: z.string().uuid().optional(),
-  filters: z.object({
-    type: z.array(z.enum(['movie', 'tv', 'documentary', 'music', 'podcast', 'audiobook'])).optional(),
-    genres: z.array(z.string()).optional(),
-    platforms: z.array(z.string()).optional(),
-    minRating: z.number().min(0).max(10).optional(),
-    releaseYearMin: z.number().min(1900).max(new Date().getFullYear()).optional(),
-    releaseYearMax: z.number().min(1900).max(new Date().getFullYear() + 5).optional(),
-    language: z.string().optional(),
-  }).optional(),
+  filters: z
+    .object({
+      type: z
+        .array(z.enum(['movie', 'tv', 'documentary', 'music', 'podcast', 'audiobook']))
+        .optional(),
+      genres: z.array(z.string()).optional(),
+      platforms: z.array(z.string()).optional(),
+      minRating: z.number().min(0).max(10).optional(),
+      releaseYearMin: z.number().min(1900).max(new Date().getFullYear()).optional(),
+      releaseYearMax: z
+        .number()
+        .min(1900)
+        .max(new Date().getFullYear() + 5)
+        .optional(),
+      language: z.string().optional(),
+    })
+    .optional(),
   limit: z.number().min(1).max(100).default(20),
   offset: z.number().min(0).default(0),
 });

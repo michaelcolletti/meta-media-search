@@ -3,22 +3,20 @@ import { AppError, isOperationalError } from '../utils/errors.js';
 import logger from '../utils/logger.js';
 import { ZodError } from 'zod';
 
-export const errorHandler = (
-  error: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const errorHandler = (error: Error, req: Request, res: Response, next: NextFunction) => {
   // Log the error
-  logger.error({
-    err: error,
-    req: {
-      method: req.method,
-      url: req.url,
-      headers: req.headers,
-      body: req.body,
+  logger.error(
+    {
+      err: error,
+      req: {
+        method: req.method,
+        url: req.url,
+        headers: req.headers,
+        body: req.body,
+      },
     },
-  }, 'Request error');
+    'Request error'
+  );
 
   // Handle Zod validation errors
   if (error instanceof ZodError) {
@@ -45,9 +43,7 @@ export const errorHandler = (
 
   // Handle unknown errors
   const statusCode = 500;
-  const message = isOperationalError(error)
-    ? error.message
-    : 'An unexpected error occurred';
+  const message = isOperationalError(error) ? error.message : 'An unexpected error occurred';
 
   res.status(statusCode).json({
     code: 'INTERNAL_SERVER_ERROR',

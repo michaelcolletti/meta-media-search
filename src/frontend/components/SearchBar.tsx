@@ -18,14 +18,12 @@ export function SearchBar() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const setQuery = useAppStore((state) => state.setQuery);
+  const setQuery = useAppStore(state => state.setQuery);
 
   useEffect(() => {
     if (value.length > 2) {
       // Simulate auto-suggestions
-      const filtered = QUICK_SEARCHES.filter((s) =>
-        s.toLowerCase().includes(value.toLowerCase())
-      );
+      const filtered = QUICK_SEARCHES.filter(s => s.toLowerCase().includes(value.toLowerCase()));
       setSuggestions(filtered);
     } else {
       setSuggestions([]);
@@ -52,13 +50,7 @@ export function SearchBar() {
     <div className="search-bar">
       <form onSubmit={handleSubmit} className="search-form">
         <div className="search-input-wrapper">
-          <svg
-            className="search-icon"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
+          <svg className="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path
               d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35"
               stroke="currentColor"
@@ -70,7 +62,7 @@ export function SearchBar() {
             ref={inputRef}
             type="text"
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={e => setValue(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             placeholder="Search for movies, shows, or describe what you're in the mood for..."

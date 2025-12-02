@@ -12,14 +12,14 @@ export default defineConfig({
     pool: 'forks',
     poolOptions: {
       forks: {
-        singleFork: false
-      }
-    }
+        singleFork: false,
+      },
+    },
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, '../../src'),
-      '@tests': resolve(__dirname, '../../tests')
-    }
-  }
+      '@tests': resolve(__dirname, '../../tests'),
+    },
+  },
 });

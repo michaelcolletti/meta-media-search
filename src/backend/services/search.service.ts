@@ -2,7 +2,13 @@ import aiService from './ai.service.js';
 import tmdbService from './tmdb.service.js';
 import cacheService from './cache.service.js';
 import mediaModel from '../models/media.model.js';
-import { SearchQuery, SearchResult, SearchFilters, VisualMapNode, MediaItem } from '@types/index.js';
+import {
+  SearchQuery,
+  SearchResult,
+  SearchFilters,
+  VisualMapNode,
+  MediaItem,
+} from '@types/index.js';
 import logger from '../utils/logger.js';
 import config from '../config/index.js';
 
@@ -100,11 +106,14 @@ class SearchService {
       // Cache the results
       await cacheService.set(cacheKey, result, 1800); // 30 minutes
 
-      logger.info({
-        query: searchQuery.query,
-        resultsCount: result.items.length,
-        processingTime: result.processingTime,
-      }, 'Search completed');
+      logger.info(
+        {
+          query: searchQuery.query,
+          resultsCount: result.items.length,
+          processingTime: result.processingTime,
+        },
+        'Search completed'
+      );
 
       return result;
     } catch (error) {
@@ -126,13 +135,15 @@ class SearchService {
         // Personalized discovery based on user preferences
         const context = await this.getUserContext(userId);
 
-        items = await mediaModel.search(
-          {
-            genres: context.preferences?.genres,
-            minRating: context.preferences?.minRating || 7.0,
-          },
-          { page: 1, limit, sortBy: 'created_at', sortOrder: 'desc' }
-        ).then(result => result.items);
+        items = await mediaModel
+          .search(
+            {
+              genres: context.preferences?.genres,
+              minRating: context.preferences?.minRating || 7.0,
+            },
+            { page: 1, limit, sortBy: 'created_at', sortOrder: 'desc' }
+          )
+          .then(result => result.items);
       } else {
         // Generic trending content
         items = await mediaModel.getTrending(limit);
@@ -224,7 +235,7 @@ class SearchService {
         title: item.title,
         type: item.type,
         thumbnail: item.thumbnail,
-        relevanceScore: 1.0 - (index / items.length),
+        relevanceScore: 1.0 - index / items.length,
         position: {
           x: Math.cos(angle) * radius,
           y: Math.sin(angle) * radius,
@@ -265,9 +276,11 @@ class SearchService {
     items.forEach(item => item.genres?.forEach(g => genres.add(g)));
 
     // Generate genre-based suggestions
-    Array.from(genres).slice(0, 3).forEach(genre => {
-      suggestions.push(`${genre} movies`);
-    });
+    Array.from(genres)
+      .slice(0, 3)
+      .forEach(genre => {
+        suggestions.push(`${genre} movies`);
+      });
 
     // Add platform-based suggestions
     if (aiResponse.suggestedPlatforms?.length > 0) {

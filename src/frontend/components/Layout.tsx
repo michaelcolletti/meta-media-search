@@ -4,7 +4,7 @@ import { useAppStore } from '@store/index';
 import { useEffect } from 'react';
 
 export function Layout() {
-  const preferences = useAppStore((state) => state.preferences);
+  const preferences = useAppStore(state => state.preferences);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', preferences.theme);

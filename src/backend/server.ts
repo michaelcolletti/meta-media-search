@@ -23,18 +23,22 @@ class Server {
 
   private setupMiddleware(): void {
     // Security middleware
-    this.app.use(helmet({
-      contentSecurityPolicy: config.NODE_ENV === 'production',
-      crossOriginEmbedderPolicy: config.NODE_ENV === 'production',
-    }));
+    this.app.use(
+      helmet({
+        contentSecurityPolicy: config.NODE_ENV === 'production',
+        crossOriginEmbedderPolicy: config.NODE_ENV === 'production',
+      })
+    );
 
     // CORS
-    this.app.use(cors({
-      origin: config.ALLOWED_ORIGINS,
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    }));
+    this.app.use(
+      cors({
+        origin: config.ALLOWED_ORIGINS,
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+      })
+    );
 
     // Compression
     this.app.use(compression());
@@ -47,20 +51,25 @@ class Server {
     if (config.NODE_ENV === 'development') {
       this.app.use(morgan('dev'));
     } else {
-      this.app.use(morgan('combined', {
-        stream: {
-          write: (message: string) => logger.info(message.trim()),
-        },
-      }));
+      this.app.use(
+        morgan('combined', {
+          stream: {
+            write: (message: string) => logger.info(message.trim()),
+          },
+        })
+      );
     }
 
     // Request logging
     this.app.use((req, res, next) => {
-      logger.debug({
-        method: req.method,
-        url: req.url,
-        ip: req.ip,
-      }, 'Incoming request');
+      logger.debug(
+        {
+          method: req.method,
+          url: req.url,
+          ip: req.ip,
+        },
+        'Incoming request'
+      );
       next();
     });
   }
@@ -140,13 +149,16 @@ class Server {
     process.on('SIGINT', () => shutdown('SIGINT'));
 
     process.on('unhandledRejection', (reason, promise) => {
-      logger.error({
-        err: reason,
-        promise,
-      }, 'Unhandled promise rejection');
+      logger.error(
+        {
+          err: reason,
+          promise,
+        },
+        'Unhandled promise rejection'
+      );
     });
 
-    process.on('uncaughtException', (error) => {
+    process.on('uncaughtException', error => {
       logger.error({ err: error }, 'Uncaught exception');
       shutdown('UNCAUGHT_EXCEPTION');
     });
@@ -164,13 +176,18 @@ class Server {
 
       // Start server
       this.server = this.app.listen(config.PORT, () => {
-        logger.info({
-          port: config.PORT,
-          env: config.NODE_ENV,
-          version: config.API_VERSION,
-        }, 'Server started successfully');
+        logger.info(
+          {
+            port: config.PORT,
+            env: config.NODE_ENV,
+            version: config.API_VERSION,
+          },
+          'Server started successfully'
+        );
 
-        logger.info(`🚀 API available at http://localhost:${config.PORT}/api/${config.API_VERSION}`);
+        logger.info(
+          `🚀 API available at http://localhost:${config.PORT}/api/${config.API_VERSION}`
+        );
       });
     } catch (error) {
       logger.error({ err: error }, 'Failed to start server');

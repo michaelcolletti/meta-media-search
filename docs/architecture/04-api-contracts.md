@@ -24,15 +24,8 @@ type Query {
   ): VisualMap!
 
   # Recommendations
-  recommendations(
-    userId: ID!
-    type: RecommendationType
-    limit: Int = 20
-  ): [Recommendation!]!
-  similarContent(
-    contentId: ID!
-    limit: Int = 10
-  ): [Content!]!
+  recommendations(userId: ID!, type: RecommendationType, limit: Int = 20): [Recommendation!]!
+  similarContent(contentId: ID!, limit: Int = 10): [Content!]!
 
   # User Queries
   user(id: ID!): User
@@ -40,30 +33,17 @@ type Query {
   userPreferences(userId: ID!): UserPreferences!
 
   # Analytics
-  trendingContent(
-    timeframe: Timeframe = WEEK
-    platform: String
-    limit: Int = 20
-  ): [Content!]!
-  platformCatalog(
-    platform: String!
-    filters: ContentFilters
-  ): [Content!]!
+  trendingContent(timeframe: Timeframe = WEEK, platform: String, limit: Int = 20): [Content!]!
+  platformCatalog(platform: String!, filters: ContentFilters): [Content!]!
 }
 
 type Mutation {
   # Query Management
-  submitQuery(
-    query: String!
-    context: QueryContext
-  ): QueryResult!
+  submitQuery(query: String!, context: QueryContext): QueryResult!
 
   # User Management
   createUser(input: CreateUserInput!): User!
-  updateUserPreferences(
-    userId: ID!
-    preferences: UserPreferencesInput!
-  ): UserPreferences!
+  updateUserPreferences(userId: ID!, preferences: UserPreferencesInput!): UserPreferences!
 
   # Viewing History
   addToHistory(
@@ -74,22 +54,14 @@ type Mutation {
   ): ViewingHistoryEntry!
 
   # Ratings & Reviews
-  rateContent(
-    userId: ID!
-    contentId: ID!
-    rating: Float!
-    review: String
-  ): UserRating!
+  rateContent(userId: ID!, contentId: ID!, rating: Float!, review: String): UserRating!
 
   # Watchlist Management
   addToWatchlist(userId: ID!, contentId: ID!): User!
   removeFromWatchlist(userId: ID!, contentId: ID!): User!
 
   # Map Sharing
-  shareMap(
-    mapId: ID!
-    visibility: Visibility!
-  ): ShareableMap!
+  shareMap(mapId: ID!, visibility: Visibility!): ShareableMap!
 
   # Analytics
   trackEvent(event: AnalyticsEventInput!): Boolean!
@@ -971,13 +943,16 @@ Headers:
   "type": "message_type",
   "id": "message-uuid",
   "timestamp": "2025-01-15T10:30:00Z",
-  "payload": { /* type-specific data */ }
+  "payload": {
+    /* type-specific data */
+  }
 }
 ```
 
 ### Client → Server Messages
 
 **Subscribe to Map Updates:**
+
 ```json
 {
   "type": "subscribe_map",
@@ -989,6 +964,7 @@ Headers:
 ```
 
 **Request Map Refinement:**
+
 ```json
 {
   "type": "refine_map",
@@ -1001,6 +977,7 @@ Headers:
 ```
 
 **Unsubscribe:**
+
 ```json
 {
   "type": "unsubscribe",
@@ -1013,14 +990,19 @@ Headers:
 ### Server → Client Messages
 
 **Map Update:**
+
 ```json
 {
   "type": "map_update",
   "payload": {
     "mapId": "uuid",
     "updateType": "incremental",
-    "nodes": [ /* new/updated nodes */ ],
-    "edges": [ /* new/updated edges */ ],
+    "nodes": [
+      /* new/updated nodes */
+    ],
+    "edges": [
+      /* new/updated edges */
+    ],
     "removedNodes": ["content-123"],
     "metadata": {
       "computeTime": 145
@@ -1030,6 +1012,7 @@ Headers:
 ```
 
 **Availability Changed:**
+
 ```json
 {
   "type": "availability_update",
@@ -1043,18 +1026,22 @@ Headers:
 ```
 
 **New Recommendations:**
+
 ```json
 {
   "type": "new_recommendations",
   "payload": {
     "userId": "uuid",
-    "recommendations": [ /* recommendation objects */ ],
+    "recommendations": [
+      /* recommendation objects */
+    ],
     "reason": "new_content_match"
   }
 }
 ```
 
 **Error:**
+
 ```json
 {
   "type": "error",
@@ -1109,6 +1096,7 @@ Retry-After: 60
 ```
 
 **Rate Limits by Tier:**
+
 - Free: 100 req/min
 - Pro: 500 req/min
 - Enterprise: Custom
@@ -1134,7 +1122,7 @@ enum ErrorCode {
   // Business Logic Errors
   INSUFFICIENT_CREDITS = 'INSUFFICIENT_CREDITS',
   CONTENT_NOT_AVAILABLE = 'CONTENT_NOT_AVAILABLE',
-  EMBEDDING_GENERATION_FAILED = 'EMBEDDING_GENERATION_FAILED'
+  EMBEDDING_GENERATION_FAILED = 'EMBEDDING_GENERATION_FAILED',
 }
 ```
 

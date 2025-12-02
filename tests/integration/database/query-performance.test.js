@@ -34,7 +34,7 @@ describe('Database Query Performance', () => {
         category: 'video',
         dateFrom: '2024-01-01',
         dateTo: '2024-12-31',
-        minRating: 4.0
+        minRating: 4.0,
       };
 
       const startTime = performance.now();
@@ -55,10 +55,9 @@ describe('Database Query Performance', () => {
 
     it('should use indexes for common query patterns', async () => {
       // Simulate EXPLAIN ANALYZE to verify index usage
-      const queryPlan = await db.query(
-        'EXPLAIN ANALYZE SELECT * FROM media WHERE user_id = $1',
-        ['user-123']
-      );
+      const queryPlan = await db.query('EXPLAIN ANALYZE SELECT * FROM media WHERE user_id = $1', [
+        'user-123',
+      ]);
 
       expect(queryPlan).toBeDefined();
       // In real implementation, verify "Index Scan" in query plan
@@ -144,17 +143,18 @@ describe('Database Query Performance', () => {
       const items = Array.from({ length: 1000 }, (_, i) => ({
         title: `Item ${i}`,
         description: `Description ${i}`,
-        category: 'video'
+        category: 'video',
       }));
 
       const startTime = performance.now();
 
-      await db.transaction(async (tx) => {
+      await db.transaction(async tx => {
         for (const item of items) {
-          await tx.query(
-            'INSERT INTO media (title, description, category) VALUES ($1, $2, $3)',
-            [item.title, item.description, item.category]
-          );
+          await tx.query('INSERT INTO media (title, description, category) VALUES ($1, $2, $3)', [
+            item.title,
+            item.description,
+            item.category,
+          ]);
         }
       });
 
@@ -166,17 +166,14 @@ describe('Database Query Performance', () => {
     it('should handle batch updates efficiently', async () => {
       const updates = Array.from({ length: 100 }, (_, i) => ({
         id: `item-${i}`,
-        views: i * 10
+        views: i * 10,
       }));
 
       const startTime = performance.now();
 
-      await db.transaction(async (tx) => {
+      await db.transaction(async tx => {
         for (const update of updates) {
-          await tx.query(
-            'UPDATE media SET views = $1 WHERE id = $2',
-            [update.views, update.id]
-          );
+          await tx.query('UPDATE media SET views = $1 WHERE id = $2', [update.views, update.id]);
         }
       });
 
@@ -202,12 +199,10 @@ describe('Database Query Performance', () => {
 
     it('should handle mixed read-write workload', async () => {
       const operations = [
-        ...Array.from({ length: 25 }, () =>
-          db.query('SELECT * FROM media LIMIT 10', [])
-        ),
+        ...Array.from({ length: 25 }, () => db.query('SELECT * FROM media LIMIT 10', [])),
         ...Array.from({ length: 25 }, (_, i) =>
           db.query('UPDATE media SET views = views + 1 WHERE id = $1', [`item-${i}`])
-        )
+        ),
       ];
 
       const startTime = performance.now();
@@ -222,10 +217,7 @@ describe('Database Query Performance', () => {
     it('should handle large result sets without memory issues', async () => {
       const initialMemory = process.memoryUsage().heapUsed;
 
-      const results = await db.query(
-        'SELECT * FROM media LIMIT 10000',
-        []
-      );
+      const results = await db.query('SELECT * FROM media LIMIT 10000', []);
 
       const finalMemory = process.memoryUsage().heapUsed;
       const memoryIncrease = finalMemory - initialMemory;

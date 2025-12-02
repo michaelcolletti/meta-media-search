@@ -26,7 +26,7 @@ export function GraphVisualization({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(entries => {
       const { width, height } = entries[0].contentRect;
       setDimensions({ width, height });
     });
@@ -55,7 +55,10 @@ export function GraphVisualization({
       )
       .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius((d: any) => d.size + 10));
+      .force(
+        'collision',
+        d3.forceCollide().radius((d: any) => d.size + 10)
+      );
 
     // Create container groups
     const container = svg.append('g').attr('class', 'graph-container');
@@ -64,7 +67,7 @@ export function GraphVisualization({
     const zoom = d3
       .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
-      .on('zoom', (event) => {
+      .on('zoom', event => {
         container.attr('transform', event.transform);
       });
 
@@ -77,7 +80,7 @@ export function GraphVisualization({
       .selectAll('line')
       .data(edges)
       .join('line')
-      .attr('stroke', (d) => {
+      .attr('stroke', d => {
         const colors: Record<string, string> = {
           similar: '#6366f1',
           genre: '#8b5cf6',
@@ -88,7 +91,7 @@ export function GraphVisualization({
         return colors[d.type] || '#4b5563';
       })
       .attr('stroke-opacity', 0.3)
-      .attr('stroke-width', (d) => Math.sqrt(d.weight) * 2);
+      .attr('stroke-width', d => Math.sqrt(d.weight) * 2);
 
     // Draw nodes
     const node = container
@@ -120,8 +123,8 @@ export function GraphVisualization({
     // Add circles for nodes
     node
       .append('circle')
-      .attr('r', (d) => d.size)
-      .attr('fill', (d) => d.color)
+      .attr('r', d => d.size)
+      .attr('fill', d => d.color)
       .attr('stroke', '#fff')
       .attr('stroke-width', 2)
       .style('cursor', 'pointer')
@@ -148,13 +151,13 @@ export function GraphVisualization({
     // Add labels
     node
       .append('text')
-      .attr('dy', (d) => d.size + 15)
+      .attr('dy', d => d.size + 15)
       .attr('text-anchor', 'middle')
       .attr('fill', 'var(--color-text-primary)')
       .attr('font-size', '12px')
       .attr('font-weight', '500')
       .style('pointer-events', 'none')
-      .text((d) => d.label);
+      .text(d => d.label);
 
     // Update positions on simulation tick
     simulation.on('tick', () => {

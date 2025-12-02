@@ -38,7 +38,10 @@ class MediaModel {
     }
   }
 
-  async search(filters: SearchFilters, pagination: PaginationParams): Promise<{
+  async search(
+    filters: SearchFilters,
+    pagination: PaginationParams
+  ): Promise<{
     items: MediaItem[];
     total: number;
   }> {
@@ -87,9 +90,7 @@ class MediaModel {
         paramCount++;
       }
 
-      const whereClause = conditions.length > 0
-        ? `WHERE ${conditions.join(' AND ')}`
-        : '';
+      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
       // Get total count
       const countResult = await db.query(

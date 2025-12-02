@@ -12,21 +12,21 @@ describe('AI/ML Performance Benchmarks', () => {
   beforeAll(async () => {
     // Mock AI model
     aiModel = {
-      predict: async (input) => {
+      predict: async input => {
         // Simulate model prediction with realistic delay
         await new Promise(resolve => setTimeout(resolve, 50));
         return {
           recommendations: Array.from({ length: 10 }, (_, i) => ({
             id: `item-${i}`,
-            score: 0.9 - (i * 0.05),
-            confidence: 0.85
-          }))
+            score: 0.9 - i * 0.05,
+            confidence: 0.85,
+          })),
         };
       },
-      train: async (data) => {
+      train: async data => {
         await new Promise(resolve => setTimeout(resolve, 1000));
         return { loss: 0.15, accuracy: 0.89 };
-      }
+      },
     };
 
     // Create test dataset
@@ -36,14 +36,14 @@ describe('AI/ML Performance Benchmarks', () => {
         interactions: Array.from({ length: 50 }, (_, j) => ({
           itemId: `item-${j}`,
           action: ['view', 'like', 'share'][j % 3],
-          timestamp: Date.now() - (j * 3600000)
-        }))
+          timestamp: Date.now() - j * 3600000,
+        })),
       })),
       items: Array.from({ length: 10000 }, (_, i) => ({
         id: `item-${i}`,
         category: ['video', 'music', 'image'][i % 3],
-        tags: ['tag1', 'tag2', 'tag3']
-      }))
+        tags: ['tag1', 'tag2', 'tag3'],
+      })),
     };
   });
 
@@ -94,13 +94,9 @@ describe('AI/ML Performance Benchmarks', () => {
       const groundTruth = new Set(['item-0', 'item-1', 'item-2', 'item-3']);
 
       const predictions = await aiModel.predict({ userId: 'user-123' });
-      const recommendedIds = predictions.recommendations
-        .slice(0, 10)
-        .map(r => r.id);
+      const recommendedIds = predictions.recommendations.slice(0, 10).map(r => r.id);
 
-      const relevantRecommended = recommendedIds.filter(id =>
-        groundTruth.has(id)
-      ).length;
+      const relevantRecommended = recommendedIds.filter(id => groundTruth.has(id)).length;
 
       const precision = relevantRecommended / 10;
 
@@ -112,13 +108,9 @@ describe('AI/ML Performance Benchmarks', () => {
       const groundTruth = new Set(['item-0', 'item-1', 'item-2', 'item-3']);
 
       const predictions = await aiModel.predict({ userId: 'user-123' });
-      const recommendedIds = new Set(
-        predictions.recommendations.slice(0, 10).map(r => r.id)
-      );
+      const recommendedIds = new Set(predictions.recommendations.slice(0, 10).map(r => r.id));
 
-      const relevantRetrieved = Array.from(groundTruth).filter(id =>
-        recommendedIds.has(id)
-      ).length;
+      const relevantRetrieved = Array.from(groundTruth).filter(id => recommendedIds.has(id)).length;
 
       const recall = relevantRetrieved / groundTruth.size;
 
@@ -153,10 +145,9 @@ describe('AI/ML Performance Benchmarks', () => {
         expect(rec.confidence).toBeLessThanOrEqual(1);
       });
 
-      const avgConfidence = predictions.recommendations.reduce(
-        (sum, rec) => sum + rec.confidence,
-        0
-      ) / predictions.recommendations.length;
+      const avgConfidence =
+        predictions.recommendations.reduce((sum, rec) => sum + rec.confidence, 0) /
+        predictions.recommendations.length;
 
       console.log(`Average confidence: ${(avgConfidence * 100).toFixed(2)}%`);
       expect(avgConfidence).toBeGreaterThan(0.7);
@@ -203,9 +194,7 @@ describe('AI/ML Performance Benchmarks', () => {
 
       for (let i = 0; i < batches; i++) {
         const batch = largeUserBase.slice(i * batchSize, (i + 1) * batchSize);
-        await Promise.all(
-          batch.map(user => aiModel.predict({ userId: user.id }))
-        );
+        await Promise.all(batch.map(user => aiModel.predict({ userId: user.id })));
       }
 
       const totalTime = performance.now() - startTime;
@@ -259,23 +248,23 @@ describe('AI/ML Performance Benchmarks', () => {
       const modelA = aiModel;
       const modelB = {
         ...aiModel,
-        predict: async (input) => {
+        predict: async input => {
           await new Promise(resolve => setTimeout(resolve, 30));
           return {
             recommendations: Array.from({ length: 10 }, (_, i) => ({
               id: `item-${i + 5}`, // Different recommendations
-              score: 0.85 - (i * 0.05),
-              confidence: 0.8
-            }))
+              score: 0.85 - i * 0.05,
+              confidence: 0.8,
+            })),
           };
-        }
+        },
       };
 
       const userId = 'user-123';
 
       const [resultA, resultB] = await Promise.all([
         modelA.predict({ userId }),
-        modelB.predict({ userId })
+        modelB.predict({ userId }),
       ]);
 
       // Compare metrics

@@ -74,18 +74,21 @@ User Input (Natural Language Query)
 ### 1.1 Query Input Component
 
 **Responsibilities:**
+
 - Capture user input (text, voice)
 - Provide auto-suggestions as user types
 - Display query history and favorites
 - Detect query intent (search vs. explore)
 
 **Technology:**
+
 - React with TypeScript
 - React Hook Form for input management
 - Web Speech API for voice input
 - Debounced search with lodash
 
 **Key Interfaces:**
+
 ```typescript
 interface QueryInputProps {
   onQuerySubmit: (query: string, intent: QueryIntent) => void;
@@ -95,14 +98,15 @@ interface QueryInputProps {
 }
 
 enum QueryIntent {
-  SEARCH = 'search',           // "find action movies"
-  EXPLORE = 'explore',         // "show me something interesting"
+  SEARCH = 'search', // "find action movies"
+  EXPLORE = 'explore', // "show me something interesting"
   RECOMMENDATION = 'recommend', // "based on Breaking Bad"
-  FILTER = 'filter'            // "only on Netflix"
+  FILTER = 'filter', // "only on Netflix"
 }
 ```
 
 **State Management:**
+
 - Local state for input value
 - Global state (Zustand) for query history
 - Debounced API calls for suggestions
@@ -110,12 +114,14 @@ enum QueryIntent {
 ### 1.2 Visualization Canvas
 
 **Responsibilities:**
+
 - Render interactive graph/map of content
 - Handle user interactions (zoom, pan, select)
 - Animate transitions between queries
 - Display content details on hover/click
 
 **Technology:**
+
 - React Three Fiber (Three.js wrapper)
 - @react-three/drei for utilities
 - @react-three/fiber for WebGL rendering
@@ -157,17 +163,19 @@ enum EdgeType {
   DIRECTOR_SHARED = 'director',
   THEMATIC = 'theme',
   SEQUEL = 'sequel',
-  RECOMMENDATION = 'recommended'
+  RECOMMENDATION = 'recommended',
 }
 ```
 
 **Rendering Strategy:**
+
 - Use instanced meshes for nodes (1000+ objects)
 - LOD (Level of Detail) for distant nodes
 - Frustum culling for off-screen objects
 - Octree spatial indexing for click detection
 
 **Performance Optimizations:**
+
 ```typescript
 // Instanced mesh for efficient rendering
 const NodeInstances = ({ nodes }: { nodes: ContentNode[] }) => {
@@ -197,6 +205,7 @@ const NodeInstances = ({ nodes }: { nodes: ContentNode[] }) => {
 **Technology:** Zustand (lightweight Redux alternative)
 
 **Store Structure:**
+
 ```typescript
 interface AppState {
   // Query State
@@ -241,7 +250,7 @@ const useAppStore = create<AppState>((set, get) => ({
     set({
       nodes: data.nodes,
       edges: data.edges,
-      isLoading: false
+      isLoading: false,
     });
   },
 
@@ -277,17 +286,17 @@ const useAppStore = create<AppState>((set, get) => ({
    - Use: Genre-specific browsing
 
 **Implementation (Force-Directed):**
+
 ```typescript
 import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
-function computeForceDirectedLayout(
-  nodes: ContentNode[],
-  edges: ContentEdge[]
-): ContentNode[] {
+function computeForceDirectedLayout(nodes: ContentNode[], edges: ContentEdge[]): ContentNode[] {
   const simulation = forceSimulation(nodes)
-    .force('link', forceLink(edges)
-      .id((d: any) => d.id)
-      .distance(d => 100 / (d.strength || 0.5)) // Closer for strong relationships
+    .force(
+      'link',
+      forceLink(edges)
+        .id((d: any) => d.id)
+        .distance(d => 100 / (d.strength || 0.5)) // Closer for strong relationships
     )
     .force('charge', forceManyBody().strength(-200)) // Repulsion
     .force('center', forceCenter(0, 0)) // Keep centered
@@ -298,7 +307,7 @@ function computeForceDirectedLayout(
 
   return nodes.map(node => ({
     ...node,
-    position: { x: node.x, y: node.y, z: 0 }
+    position: { x: node.x, y: node.y, z: 0 },
   }));
 }
 ```
@@ -308,6 +317,7 @@ function computeForceDirectedLayout(
 ### 2.1 Query Service
 
 **Responsibilities:**
+
 - Parse natural language queries
 - Extract entities (actors, genres, themes)
 - Classify query intent
@@ -315,12 +325,14 @@ function computeForceDirectedLayout(
 - Return structured query representation
 
 **Technology:**
+
 - Node.js + Express
 - LangChain for LLM orchestration
 - OpenAI GPT-4 for NLP
 - sentence-transformers for embeddings
 
 **API Endpoints:**
+
 ```typescript
 // POST /api/query/parse
 interface ParseQueryRequest {
@@ -367,12 +379,13 @@ async function parseQuery(req: ParseQueryRequest): Promise<ParseQueryResponse> {
     entities: llmResult.entities,
     embedding,
     expandedTerms,
-    filters: extractFilters(req.query)
+    filters: extractFilters(req.query),
   };
 }
 ```
 
 **Caching Strategy:**
+
 - Cache parsed queries in Redis (TTL: 1 hour)
 - Cache embeddings in Redis (TTL: 24 hours)
 - Invalidate on content updates
@@ -380,18 +393,21 @@ async function parseQuery(req: ParseQueryRequest): Promise<ParseQueryResponse> {
 ### 2.2 Recommendation Service
 
 **Responsibilities:**
+
 - Generate personalized content suggestions
 - Compute content similarity scores
 - Rank results by relevance
 - Provide explanation for recommendations
 
 **Technology:**
+
 - Python FastAPI (for ML libraries)
 - PyTorch for neural models
 - Scikit-learn for traditional ML
 - Ray Serve for model serving
 
 **API Endpoints:**
+
 ```typescript
 // POST /api/recommendations/generate
 interface RecommendationRequest {
@@ -464,6 +480,7 @@ class HybridRecommender:
 ```
 
 **Explanation Generation:**
+
 ```python
 def generate_explanation(
     content: MediaContent,
@@ -493,6 +510,7 @@ def generate_explanation(
 ### 2.3 Content Aggregation Service
 
 **Responsibilities:**
+
 - Fetch metadata from multiple platforms
 - Normalize data into unified schema
 - Track content availability across platforms
@@ -500,6 +518,7 @@ def generate_explanation(
 - Enrich with external metadata (TMDB, IMDb)
 
 **Technology:**
+
 - Node.js + Express
 - Bull Queue for job processing
 - Axios for HTTP requests
@@ -518,10 +537,9 @@ interface PlatformConnector {
 class NetflixConnector implements PlatformConnector {
   async fetchCatalog(): Promise<RawContent[]> {
     // Use unofficial Netflix API or JustWatch
-    const response = await axios.get(
-      'https://api.justwatch.com/titles/en_US/popular',
-      { params: { providers: 'nfx' } }
-    );
+    const response = await axios.get('https://api.justwatch.com/titles/en_US/popular', {
+      params: { providers: 'nfx' },
+    });
     return response.data.items;
   }
 }
@@ -552,30 +570,43 @@ async function enrichMetadata(rawContent: RawContent): Promise<MediaContent> {
     embedding,
     synopsis: tmdbData.overview,
     posterUrl: `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}`,
-    backdropUrl: `https://image.tmdb.org/t/p/w1280${tmdbData.backdrop_path}`
+    backdropUrl: `https://image.tmdb.org/t/p/w1280${tmdbData.backdrop_path}`,
   };
 }
 
 // Scheduled Jobs (Bull Queue)
 async function scheduleContentUpdates() {
   // Daily full catalog refresh
-  catalogQueue.add('full-refresh', {}, {
-    repeat: { cron: '0 2 * * *' } // 2 AM daily
-  });
+  catalogQueue.add(
+    'full-refresh',
+    {},
+    {
+      repeat: { cron: '0 2 * * *' }, // 2 AM daily
+    }
+  );
 
   // Hourly incremental updates
-  catalogQueue.add('incremental-update', {}, {
-    repeat: { cron: '0 * * * *' } // Every hour
-  });
+  catalogQueue.add(
+    'incremental-update',
+    {},
+    {
+      repeat: { cron: '0 * * * *' }, // Every hour
+    }
+  );
 
   // Real-time trending updates
-  catalogQueue.add('trending-update', {}, {
-    repeat: { cron: '*/15 * * * *' } // Every 15 minutes
-  });
+  catalogQueue.add(
+    'trending-update',
+    {},
+    {
+      repeat: { cron: '*/15 * * * *' }, // Every 15 minutes
+    }
+  );
 }
 ```
 
 **Availability Tracking:**
+
 ```typescript
 interface AvailabilityChange {
   contentId: string;
@@ -598,7 +629,7 @@ async function detectAvailabilityChanges() {
         contentId: content.id,
         platform: content.platform,
         changeType: 'added',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Notify users with this in watchlist
@@ -613,7 +644,7 @@ async function detectAvailabilityChanges() {
         contentId: id,
         platform: oldContent.platform,
         changeType: 'removed',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
   }
@@ -627,17 +658,20 @@ async function detectAvailabilityChanges() {
 ### 3.1 NLP Engine
 
 **Responsibilities:**
+
 - Query understanding and classification
 - Entity extraction
 - Intent detection
 - Query expansion
 
 **Models:**
+
 - GPT-4 for complex reasoning
 - Fine-tuned BERT for entity extraction
 - Custom classifier for intent detection
 
 **Implementation:**
+
 ```python
 from langchain.llms import OpenAI
 from langchain.chains import LLMChain
@@ -706,6 +740,7 @@ class NLPEngine:
 **Purpose:** Fast semantic similarity search
 
 **Schema:**
+
 ```typescript
 interface ContentVector {
   id: string; // Content ID
@@ -732,9 +767,9 @@ await index.upsert({
       genres: c.genres,
       year: c.year,
       platform: c.platforms[0].name,
-      rating: c.rating
-    }
-  }))
+      rating: c.rating,
+    },
+  })),
 });
 
 // Semantic search
@@ -744,13 +779,14 @@ const results = await index.query({
   filter: {
     genres: { $in: ['Action', 'Thriller'] },
     year: { $gte: 2020 },
-    rating: { $gte: 7.0 }
+    rating: { $gte: 7.0 },
   },
-  includeMetadata: true
+  includeMetadata: true,
 });
 ```
 
 **Optimization:**
+
 - Namespace by platform for faster filtering
 - Sparse-dense hybrid search for keyword+semantic
 - Regular reindexing (weekly) for fresh content
@@ -876,6 +912,7 @@ CREATE INDEX idx_user_preferences_vector ON user_preferences
 **Cache Layers:**
 
 1. **Query Results** (TTL: 1 hour)
+
 ```typescript
 const cacheKey = `query:${hashQuery(query)}:${JSON.stringify(filters)}`;
 const cached = await redis.get(cacheKey);
@@ -887,6 +924,7 @@ await redis.setex(cacheKey, 3600, JSON.stringify(results));
 ```
 
 2. **Content Metadata** (TTL: 24 hours)
+
 ```typescript
 const contentKey = `content:${contentId}`;
 const content = await redis.get(contentKey);
@@ -899,6 +937,7 @@ if (!content) {
 ```
 
 3. **User Preferences** (TTL: 1 hour, invalidate on update)
+
 ```typescript
 const userPrefKey = `user:${userId}:preferences`;
 const prefs = await redis.get(userPrefKey);
@@ -911,6 +950,7 @@ if (!prefs) {
 ```
 
 4. **Embeddings** (TTL: 7 days)
+
 ```typescript
 const embeddingKey = `embedding:${text}`;
 const cached = await redis.get(embeddingKey);
@@ -923,13 +963,17 @@ if (!cached) {
 ```
 
 **Pub/Sub for Real-Time Updates:**
+
 ```typescript
 // Publisher (when content updates)
-await redis.publish('content:updates', JSON.stringify({
-  type: 'new_content',
-  contentId: '123',
-  platform: 'Netflix'
-}));
+await redis.publish(
+  'content:updates',
+  JSON.stringify({
+    type: 'new_content',
+    contentId: '123',
+    platform: 'Netflix',
+  })
+);
 
 // Subscriber (frontend WebSocket)
 redis.subscribe('content:updates');
@@ -942,18 +986,21 @@ redis.on('message', (channel, message) => {
 ## Integration Patterns
 
 ### API Gateway → Microservices
+
 - Use GraphQL federation for schema composition
 - Implement circuit breakers for fault tolerance
 - Rate limiting per user/IP
 - Request tracing with OpenTelemetry
 
 ### Microservices → AI Layer
+
 - Async message queue (RabbitMQ) for ML inference
 - Batching requests for GPU efficiency
 - Fallback to cached results on timeout
 - A/B testing framework for model versions
 
 ### Real-Time Data Flow
+
 - WebSocket connections for live map updates
 - Server-Sent Events for availability notifications
 - Progressive enhancement (render basic map, refine with AI)

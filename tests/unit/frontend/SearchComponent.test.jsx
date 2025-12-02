@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 const SearchComponent = ({ onSearch, results = [], loading = false }) => {
   const [query, setQuery] = React.useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
     onSearch(query);
   };
@@ -23,7 +23,7 @@ const SearchComponent = ({ onSearch, results = [], loading = false }) => {
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={e => setQuery(e.target.value)}
           placeholder="Search media..."
           aria-label="Search media"
         />
@@ -36,7 +36,7 @@ const SearchComponent = ({ onSearch, results = [], loading = false }) => {
 
       {results.length > 0 && (
         <ul role="list" aria-label="Search results">
-          {results.map((result) => (
+          {results.map(result => (
             <li key={result.id}>
               <h3>{result.title}</h3>
               <p>{result.description}</p>
@@ -46,9 +46,7 @@ const SearchComponent = ({ onSearch, results = [], loading = false }) => {
         </ul>
       )}
 
-      {!loading && results.length === 0 && query && (
-        <p>No results found</p>
-      )}
+      {!loading && results.length === 0 && query && <p>No results found</p>}
     </div>
   );
 };
@@ -103,7 +101,7 @@ describe('SearchComponent', () => {
   it('should render search results', () => {
     const mockResults = [
       { id: '1', title: 'Result 1', description: 'Desc 1', relevance: 0.95 },
-      { id: '2', title: 'Result 2', description: 'Desc 2', relevance: 0.87 }
+      { id: '2', title: 'Result 2', description: 'Desc 2', relevance: 0.87 },
     ];
 
     render(<SearchComponent onSearch={mockOnSearch} results={mockResults} />);

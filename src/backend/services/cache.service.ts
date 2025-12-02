@@ -9,7 +9,7 @@ class CacheService {
 
   constructor() {
     this.client = new Redis(config.REDIS_URL, {
-      retryStrategy: (times) => {
+      retryStrategy: times => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
@@ -22,7 +22,7 @@ class CacheService {
       logger.info('Redis connected successfully');
     });
 
-    this.client.on('error', (error) => {
+    this.client.on('error', error => {
       logger.error({ err: error }, 'Redis connection error');
     });
   }

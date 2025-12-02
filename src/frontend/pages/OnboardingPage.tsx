@@ -9,31 +9,36 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to Visual Discovery',
-    description: 'Discover movies and TV shows in an entirely new way - through an interactive visual map that reveals connections and patterns.',
+    description:
+      'Discover movies and TV shows in an entirely new way - through an interactive visual map that reveals connections and patterns.',
     action: 'Next',
   },
   {
     id: 'map',
     title: 'Explore the Map',
-    description: 'Each node represents a movie or show. The closer they are, the more similar they are. Zoom, pan, and click to navigate.',
+    description:
+      'Each node represents a movie or show. The closer they are, the more similar they are. Zoom, pan, and click to navigate.',
     action: 'Next',
   },
   {
     id: 'connections',
     title: 'See Connections',
-    description: 'Lines between nodes show relationships - shared genres, similar themes, or related content. Colors represent different categories.',
+    description:
+      'Lines between nodes show relationships - shared genres, similar themes, or related content. Colors represent different categories.',
     action: 'Next',
   },
   {
     id: 'search',
     title: 'Search Naturally',
-    description: 'Just describe what you want to watch. "Feel-good comedies on Netflix" or "Sci-fi like The Expanse" - the map adapts to your query.',
+    description:
+      'Just describe what you want to watch. "Feel-good comedies on Netflix" or "Sci-fi like The Expanse" - the map adapts to your query.',
     action: 'Next',
   },
   {
     id: 'controls',
     title: 'Customize Your View',
-    description: 'Change layouts, color schemes, and visualization options to find content the way that works best for you.',
+    description:
+      'Change layouts, color schemes, and visualization options to find content the way that works best for you.',
     action: 'Start Exploring',
   },
 ];
@@ -41,7 +46,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 export function OnboardingPage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
-  const completeTutorial = useAppStore((state) => state.completeTutorial);
+  const completeTutorial = useAppStore(state => state.completeTutorial);
 
   const step = ONBOARDING_STEPS[currentStep];
   const isLastStep = currentStep === ONBOARDING_STEPS.length - 1;
@@ -118,9 +123,33 @@ export function OnboardingPage() {
               )}
               {step.id === 'connections' && (
                 <svg viewBox="0 0 300 200" className="onboarding-illustration">
-                  <line x1="50" y1="100" x2="250" y2="100" stroke="#6366f1" strokeWidth="3" opacity="0.5" />
-                  <line x1="100" y1="50" x2="200" y2="150" stroke="#8b5cf6" strokeWidth="3" opacity="0.5" />
-                  <line x1="100" y1="150" x2="200" y2="50" stroke="#ec4899" strokeWidth="3" opacity="0.5" />
+                  <line
+                    x1="50"
+                    y1="100"
+                    x2="250"
+                    y2="100"
+                    stroke="#6366f1"
+                    strokeWidth="3"
+                    opacity="0.5"
+                  />
+                  <line
+                    x1="100"
+                    y1="50"
+                    x2="200"
+                    y2="150"
+                    stroke="#8b5cf6"
+                    strokeWidth="3"
+                    opacity="0.5"
+                  />
+                  <line
+                    x1="100"
+                    y1="150"
+                    x2="200"
+                    y2="50"
+                    stroke="#ec4899"
+                    strokeWidth="3"
+                    opacity="0.5"
+                  />
                   <circle cx="50" cy="100" r="15" fill="#6366f1" />
                   <circle cx="250" cy="100" r="15" fill="#8b5cf6" />
                   <circle cx="100" cy="50" r="15" fill="#ec4899" />
@@ -129,9 +158,25 @@ export function OnboardingPage() {
               )}
               {step.id === 'search' && (
                 <svg viewBox="0 0 300 200" className="onboarding-illustration">
-                  <rect x="50" y="80" width="200" height="40" rx="20" fill="#6366f1" opacity="0.2" />
+                  <rect
+                    x="50"
+                    y="80"
+                    width="200"
+                    height="40"
+                    rx="20"
+                    fill="#6366f1"
+                    opacity="0.2"
+                  />
                   <circle cx="220" cy="100" r="15" fill="#6366f1" />
-                  <line x1="230" y1="110" x2="245" y2="125" stroke="#6366f1" strokeWidth="4" strokeLinecap="round" />
+                  <line
+                    x1="230"
+                    y1="110"
+                    x2="245"
+                    y2="125"
+                    stroke="#6366f1"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
                 </svg>
               )}
               {step.id === 'controls' && (
@@ -151,10 +196,7 @@ export function OnboardingPage() {
         </AnimatePresence>
 
         <div className="onboarding-actions">
-          <button
-            className="onboarding-button onboarding-button--secondary"
-            onClick={handleSkip}
-          >
+          <button className="onboarding-button onboarding-button--secondary" onClick={handleSkip}>
             Skip Tutorial
           </button>
 
@@ -167,10 +209,7 @@ export function OnboardingPage() {
                 Previous
               </button>
             )}
-            <button
-              className="onboarding-button onboarding-button--primary"
-              onClick={handleNext}
-            >
+            <button className="onboarding-button onboarding-button--primary" onClick={handleNext}>
               {step.action}
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path

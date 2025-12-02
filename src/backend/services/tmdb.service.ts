@@ -99,7 +99,10 @@ class TMDBService {
     }
   }
 
-  async getTrending(mediaType: 'movie' | 'tv' | 'all', timeWindow: 'day' | 'week' = 'week'): Promise<MediaItem[]> {
+  async getTrending(
+    mediaType: 'movie' | 'tv' | 'all',
+    timeWindow: 'day' | 'week' = 'week'
+  ): Promise<MediaItem[]> {
     const cacheKey = cacheService.generateKey('tmdb', 'trending', mediaType, timeWindow);
     const cached = await cacheService.get<MediaItem[]>(cacheKey);
 
@@ -155,7 +158,9 @@ class TMDBService {
       rating: item.vote_average || 0,
       thumbnail: item.poster_path ? `${this.imageBaseUrl}/w500${item.poster_path}` : '',
       posterUrl: item.poster_path ? `${this.imageBaseUrl}/original${item.poster_path}` : '',
-      backdropUrl: item.backdrop_path ? `${this.imageBaseUrl}/original${item.backdrop_path}` : undefined,
+      backdropUrl: item.backdrop_path
+        ? `${this.imageBaseUrl}/original${item.backdrop_path}`
+        : undefined,
       platforms: [],
       metadata: {
         tmdbId: item.id,
@@ -178,7 +183,9 @@ class TMDBService {
       rating: movie.vote_average || 0,
       thumbnail: movie.poster_path ? `${this.imageBaseUrl}/w500${movie.poster_path}` : '',
       posterUrl: movie.poster_path ? `${this.imageBaseUrl}/original${movie.poster_path}` : '',
-      backdropUrl: movie.backdrop_path ? `${this.imageBaseUrl}/original${movie.backdrop_path}` : undefined,
+      backdropUrl: movie.backdrop_path
+        ? `${this.imageBaseUrl}/original${movie.backdrop_path}`
+        : undefined,
       trailerUrl: undefined, // Would need additional API call to get videos
       platforms: this.extractPlatforms(providers),
       cast: credits.cast?.slice(0, 10).map((c: any) => ({
@@ -213,7 +220,9 @@ class TMDBService {
       rating: tv.vote_average || 0,
       thumbnail: tv.poster_path ? `${this.imageBaseUrl}/w500${tv.poster_path}` : '',
       posterUrl: tv.poster_path ? `${this.imageBaseUrl}/original${tv.poster_path}` : '',
-      backdropUrl: tv.backdrop_path ? `${this.imageBaseUrl}/original${tv.backdrop_path}` : undefined,
+      backdropUrl: tv.backdrop_path
+        ? `${this.imageBaseUrl}/original${tv.backdrop_path}`
+        : undefined,
       platforms: this.extractPlatforms(providers),
       cast: credits.cast?.slice(0, 10).map((c: any) => ({
         id: c.id.toString(),

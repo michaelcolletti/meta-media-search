@@ -12,7 +12,8 @@ const SAMPLE_CONTENT: MediaContent[] = [
     year: 1999,
     rating: 8.7,
     genres: ['Action', 'Sci-Fi'],
-    description: 'A computer hacker learns about the true nature of reality and his role in the war against its controllers.',
+    description:
+      'A computer hacker learns about the true nature of reality and his role in the war against its controllers.',
     platforms: [
       { name: 'Netflix', url: 'https://netflix.com', type: 'streaming', quality: 'HD' },
       { name: 'HBO Max', url: 'https://hbomax.com', type: 'streaming', quality: '4K' },
@@ -41,10 +42,9 @@ const SAMPLE_CONTENT: MediaContent[] = [
     year: 2017,
     rating: 8.0,
     genres: ['Sci-Fi', 'Thriller'],
-    description: 'A young blade runner discovers a long-buried secret that has the potential to plunge society into chaos.',
-    platforms: [
-      { name: 'Netflix', url: 'https://netflix.com', type: 'streaming', quality: '4K' },
-    ],
+    description:
+      'A young blade runner discovers a long-buried secret that has the potential to plunge society into chaos.',
+    platforms: [{ name: 'Netflix', url: 'https://netflix.com', type: 'streaming', quality: '4K' }],
     mood: ['Atmospheric', 'Thought-provoking'],
     popularity: 85,
   },
@@ -55,7 +55,8 @@ const SAMPLE_CONTENT: MediaContent[] = [
     year: 2014,
     rating: 8.6,
     genres: ['Sci-Fi', 'Drama'],
-    description: 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity\'s survival.',
+    description:
+      "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
     platforms: [
       { name: 'Paramount+', url: 'https://paramount.com', type: 'streaming', quality: '4K' },
     ],
@@ -83,10 +84,9 @@ const SAMPLE_CONTENT: MediaContent[] = [
     year: 2021,
     rating: 8.1,
     genres: ['Sci-Fi', 'Adventure'],
-    description: 'A noble family becomes embroiled in a war for control over the galaxy\'s most valuable asset.',
-    platforms: [
-      { name: 'HBO Max', url: 'https://hbomax.com', type: 'streaming', quality: '4K' },
-    ],
+    description:
+      "A noble family becomes embroiled in a war for control over the galaxy's most valuable asset.",
+    platforms: [{ name: 'HBO Max', url: 'https://hbomax.com', type: 'streaming', quality: '4K' }],
     mood: ['Epic', 'Visually stunning'],
     popularity: 94,
   },
@@ -98,9 +98,7 @@ const SAMPLE_CONTENT: MediaContent[] = [
     rating: 7.9,
     genres: ['Sci-Fi', 'Drama'],
     description: 'A linguist works with the military to communicate with alien lifeforms.',
-    platforms: [
-      { name: 'Netflix', url: 'https://netflix.com', type: 'streaming', quality: 'HD' },
-    ],
+    platforms: [{ name: 'Netflix', url: 'https://netflix.com', type: 'streaming', quality: 'HD' }],
     mood: ['Thought-provoking', 'Emotional'],
     popularity: 82,
   },
@@ -111,7 +109,8 @@ const SAMPLE_CONTENT: MediaContent[] = [
     year: 2014,
     rating: 7.7,
     genres: ['Sci-Fi', 'Thriller'],
-    description: 'A young programmer is selected to participate in a ground-breaking experiment in synthetic intelligence.',
+    description:
+      'A young programmer is selected to participate in a ground-breaking experiment in synthetic intelligence.',
     platforms: [
       { name: 'Amazon Prime', url: 'https://amazon.com', type: 'streaming', quality: 'HD' },
     ],
@@ -149,9 +148,7 @@ const createGraphEdges = (nodes: GraphNode[]): GraphEdge[] => {
       const nodeB = nodes[j];
 
       // Calculate similarity based on genres
-      const sharedGenres = nodeA.content.genres.filter((g) =>
-        nodeB.content.genres.includes(g)
-      );
+      const sharedGenres = nodeA.content.genres.filter(g => nodeB.content.genres.includes(g));
 
       if (sharedGenres.length > 0) {
         edges.push({
@@ -164,8 +161,7 @@ const createGraphEdges = (nodes: GraphNode[]): GraphEdge[] => {
       }
 
       // Add mood connections
-      const sharedMoods =
-        nodeA.content.mood?.filter((m) => nodeB.content.mood?.includes(m)) || [];
+      const sharedMoods = nodeA.content.mood?.filter(m => nodeB.content.mood?.includes(m)) || [];
 
       if (sharedMoods.length > 0) {
         edges.push({

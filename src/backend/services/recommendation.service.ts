@@ -112,11 +112,14 @@ class RecommendationService {
       // Cache recommendations
       await cacheService.set(cacheKey, result, 3600); // 1 hour
 
-      logger.info({
-        userId: request.userId,
-        recommendationsCount: result.items.length,
-        confidence: result.confidence,
-      }, 'Recommendations generated');
+      logger.info(
+        {
+          userId: request.userId,
+          recommendationsCount: result.items.length,
+          confidence: result.confidence,
+        },
+        'Recommendations generated'
+      );
 
       return result;
     } catch (error) {
@@ -147,44 +150,40 @@ class RecommendationService {
     userEmbedding: number[],
     diversityFactor: number
   ): Promise<Array<MediaItem & { score: number }>> {
-    return items.map(item => {
-      let score = 0;
+    return items
+      .map(item => {
+        let score = 0;
 
-      // Genre match (30% weight)
-      if (preferences.genres && preferences.genres.length > 0) {
-        const genreMatches = item.genres?.filter(g =>
-          preferences.genres.includes(g)
-        ).length || 0;
-        score += (genreMatches / Math.max(preferences.genres.length, 1)) * 0.3;
-      }
-
-      // Rating alignment (25% weight)
-      const minRating = preferences.minRating || 7.0;
-      if (item.rating >= minRating) {
-        score += 0.25;
-      }
-
-      // Platform availability (15% weight)
-      if (preferences.platforms && preferences.platforms.length > 0) {
-        const platformMatches = item.platforms?.filter(p =>
-          preferences.platforms.includes(p.name)
-        ).length || 0;
-        if (platformMatches > 0) {
-          score += 0.15;
+        // Genre match (30% weight)
+        if (preferences.genres && preferences.genres.length > 0) {
+          const genreMatches = item.genres?.filter(g => preferences.genres.includes(g)).length || 0;
+          score += (genreMatches / Math.max(preferences.genres.length, 1)) * 0.3;
         }
-      }
 
-      // Semantic similarity (30% weight)
-      if (item.embedding) {
-        const similarity = aiService.calculateCosineSimilarity(
-          userEmbedding,
-          item.embedding
-        );
-        score += similarity * 0.3;
-      }
+        // Rating alignment (25% weight)
+        const minRating = preferences.minRating || 7.0;
+        if (item.rating >= minRating) {
+          score += 0.25;
+        }
 
-      return { ...item, score };
-    }).sort((a, b) => b.score - a.score);
+        // Platform availability (15% weight)
+        if (preferences.platforms && preferences.platforms.length > 0) {
+          const platformMatches =
+            item.platforms?.filter(p => preferences.platforms.includes(p.name)).length || 0;
+          if (platformMatches > 0) {
+            score += 0.15;
+          }
+        }
+
+        // Semantic similarity (30% weight)
+        if (item.embedding) {
+          const similarity = aiService.calculateCosineSimilarity(userEmbedding, item.embedding);
+          score += similarity * 0.3;
+        }
+
+        return { ...item, score };
+      })
+      .sort((a, b) => b.score - a.score);
   }
 
   private diversifyRecommendations(
@@ -222,7 +221,10 @@ class RecommendationService {
     return selected;
   }
 
-  private calculateFactors(items: MediaItem[], preferences: any): {
+  private calculateFactors(
+    items: MediaItem[],
+    preferences: any
+  ): {
     genreMatch: number;
     platformAvailability: number;
     ratingAlignment: number;
@@ -243,16 +245,13 @@ class RecommendationService {
 
     items.forEach(item => {
       if (preferences.genres) {
-        const matches = item.genres?.filter(g =>
-          preferences.genres.includes(g)
-        ).length || 0;
+        const matches = item.genres?.filter(g => preferences.genres.includes(g)).length || 0;
         genreMatch += matches / Math.max(preferences.genres.length, 1);
       }
 
       if (preferences.platforms) {
-        const matches = item.platforms?.filter(p =>
-          preferences.platforms.includes(p.name)
-        ).length || 0;
+        const matches =
+          item.platforms?.filter(p => preferences.platforms.includes(p.name)).length || 0;
         platformAvailability += matches > 0 ? 1 : 0;
       }
 
@@ -273,12 +272,11 @@ class RecommendationService {
     let confidence = Math.min(historySize / 20, 0.5);
 
     // Boost with factor scores
-    confidence += (
+    confidence +=
       factors.genreMatch * 0.2 +
       factors.platformAvailability * 0.1 +
       factors.ratingAlignment * 0.1 +
-      factors.contentSimilarity * 0.1
-    );
+      factors.contentSimilarity * 0.1;
 
     return Math.min(confidence, 1.0);
   }

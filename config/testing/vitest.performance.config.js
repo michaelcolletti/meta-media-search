@@ -9,12 +9,12 @@ export default defineConfig({
     testTimeout: 60000,
     hookTimeout: 60000,
     reporters: ['verbose', 'json'],
-    outputFile: './docs/testing/performance-results.json'
+    outputFile: './docs/testing/performance-results.json',
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, '../../src'),
-      '@tests': resolve(__dirname, '../../tests')
-    }
-  }
+      '@tests': resolve(__dirname, '../../tests'),
+    },
+  },
 });

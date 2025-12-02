@@ -88,67 +88,80 @@ export const useAppStore = create<AppState>()(
       },
 
       // Actions
-      setQuery: (query) => set((state) => ({
-        query: { ...state.query, ...query },
-      })),
+      setQuery: query =>
+        set(state => ({
+          query: { ...state.query, ...query },
+        })),
 
-      setSearchResults: (results) => set({ searchResults: results }),
+      setSearchResults: results => set({ searchResults: results }),
 
-      setIsSearching: (isSearching) => set({ isSearching }),
+      setIsSearching: isSearching => set({ isSearching }),
 
-      setSelectedContent: (content) => set({ selectedContent: content }),
+      setSelectedContent: content => set({ selectedContent: content }),
 
-      updatePreferences: (preferences) => set((state) => ({
-        preferences: { ...state.preferences, ...preferences },
-      })),
+      updatePreferences: preferences =>
+        set(state => ({
+          preferences: { ...state.preferences, ...preferences },
+        })),
 
-      addBookmark: (contentId) => set((state) => ({
-        bookmarks: [...state.bookmarks, contentId],
-      })),
+      addBookmark: contentId =>
+        set(state => ({
+          bookmarks: [...state.bookmarks, contentId],
+        })),
 
-      removeBookmark: (contentId) => set((state) => ({
-        bookmarks: state.bookmarks.filter((id) => id !== contentId),
-      })),
+      removeBookmark: contentId =>
+        set(state => ({
+          bookmarks: state.bookmarks.filter(id => id !== contentId),
+        })),
 
-      addToWatchHistory: (contentId) => set((state) => ({
-        watchHistory: [contentId, ...state.watchHistory.filter((id) => id !== contentId)].slice(0, 100),
-      })),
+      addToWatchHistory: contentId =>
+        set(state => ({
+          watchHistory: [contentId, ...state.watchHistory.filter(id => id !== contentId)].slice(
+            0,
+            100
+          ),
+        })),
 
-      updateVizConfig: (config) => set((state) => ({
-        vizConfig: { ...state.vizConfig, ...config },
-      })),
+      updateVizConfig: config =>
+        set(state => ({
+          vizConfig: { ...state.vizConfig, ...config },
+        })),
 
-      setHoveredNode: (nodeId) => set({ hoveredNode: nodeId }),
+      setHoveredNode: nodeId => set({ hoveredNode: nodeId }),
 
-      updateTutorial: (tutorial) => set((state) => ({
-        tutorial: { ...state.tutorial, ...tutorial },
-      })),
+      updateTutorial: tutorial =>
+        set(state => ({
+          tutorial: { ...state.tutorial, ...tutorial },
+        })),
 
-      nextTutorialStep: () => set((state) => ({
-        tutorial: {
-          ...state.tutorial,
-          currentStep: Math.min(state.tutorial.currentStep + 1, state.tutorial.steps.length - 1),
-        },
-      })),
+      nextTutorialStep: () =>
+        set(state => ({
+          tutorial: {
+            ...state.tutorial,
+            currentStep: Math.min(state.tutorial.currentStep + 1, state.tutorial.steps.length - 1),
+          },
+        })),
 
-      prevTutorialStep: () => set((state) => ({
-        tutorial: {
-          ...state.tutorial,
-          currentStep: Math.max(state.tutorial.currentStep - 1, 0),
-        },
-      })),
+      prevTutorialStep: () =>
+        set(state => ({
+          tutorial: {
+            ...state.tutorial,
+            currentStep: Math.max(state.tutorial.currentStep - 1, 0),
+          },
+        })),
 
-      completeTutorial: () => set((state) => ({
-        tutorial: {
-          ...state.tutorial,
-          isActive: false,
-          completed: true,
-        },
-      })),
+      completeTutorial: () =>
+        set(state => ({
+          tutorial: {
+            ...state.tutorial,
+            isActive: false,
+            completed: true,
+          },
+        })),
     }),
     {
       name: 'meta-media-search-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         preferences: state.preferences,
         bookmarks: state.bookmarks,
         watchHistory: state.watchHistory,

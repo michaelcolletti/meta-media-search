@@ -16,13 +16,13 @@ describe('API Endpoints', () => {
       params: {},
       query: {},
       headers: {},
-      user: null
+      user: null,
     };
 
     mockResponse = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
-      send: vi.fn().mockReturnThis()
+      send: vi.fn().mockReturnThis(),
     };
 
     mockNext = vi.fn();
@@ -33,14 +33,14 @@ describe('API Endpoints', () => {
       const searchQuery = 'test query';
       const expectedResults = [
         { id: '1', title: 'Result 1', relevance: 0.95 },
-        { id: '2', title: 'Result 2', relevance: 0.87 }
+        { id: '2', title: 'Result 2', relevance: 0.87 },
       ];
 
       mockRequest.query = { q: searchQuery, limit: 10 };
 
       // Mock search service
       const searchService = {
-        search: vi.fn().mockResolvedValue(expectedResults)
+        search: vi.fn().mockResolvedValue(expectedResults),
       };
 
       // Simulate API handler
@@ -54,7 +54,7 @@ describe('API Endpoints', () => {
       expect(searchService.search).toHaveBeenCalledWith(searchQuery, 10);
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
-        data: expectedResults
+        data: expectedResults,
       });
     });
 
@@ -65,7 +65,7 @@ describe('API Endpoints', () => {
         if (!req.query.q || req.query.q.trim() === '') {
           return res.status(400).json({
             success: false,
-            error: 'Search query is required'
+            error: 'Search query is required',
           });
         }
       };
@@ -75,7 +75,7 @@ describe('API Endpoints', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(400);
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: false,
-        error: 'Search query is required'
+        error: 'Search query is required',
       });
     });
 
@@ -84,18 +84,18 @@ describe('API Endpoints', () => {
         q: 'test',
         category: 'video',
         dateFrom: '2024-01-01',
-        dateTo: '2024-12-31'
+        dateTo: '2024-12-31',
       };
 
       const searchService = {
-        search: vi.fn().mockResolvedValue([])
+        search: vi.fn().mockResolvedValue([]),
       };
 
       const handleSearch = async (req, res) => {
         const { q, category, dateFrom, dateTo } = req.query;
         const results = await searchService.search(q, {
           category,
-          dateRange: { from: dateFrom, to: dateTo }
+          dateRange: { from: dateFrom, to: dateTo },
         });
         res.json({ success: true, data: results });
       };
@@ -104,7 +104,7 @@ describe('API Endpoints', () => {
 
       expect(searchService.search).toHaveBeenCalledWith('test', {
         category: 'video',
-        dateRange: { from: '2024-01-01', to: '2024-12-31' }
+        dateRange: { from: '2024-01-01', to: '2024-12-31' },
       });
     });
   });
@@ -116,11 +116,11 @@ describe('API Endpoints', () => {
 
       const recommendations = [
         { id: '1', title: 'Rec 1', score: 0.92 },
-        { id: '2', title: 'Rec 2', score: 0.88 }
+        { id: '2', title: 'Rec 2', score: 0.88 },
       ];
 
       const recommendationService = {
-        getRecommendations: vi.fn().mockResolvedValue(recommendations)
+        getRecommendations: vi.fn().mockResolvedValue(recommendations),
       };
 
       const handleRecommendations = async (req, res) => {
@@ -133,13 +133,10 @@ describe('API Endpoints', () => {
 
       await handleRecommendations(mockRequest, mockResponse);
 
-      expect(recommendationService.getRecommendations).toHaveBeenCalledWith(
-        'user-123',
-        5
-      );
+      expect(recommendationService.getRecommendations).toHaveBeenCalledWith('user-123', 5);
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
-        data: recommendations
+        data: recommendations,
       });
     });
 
@@ -150,7 +147,7 @@ describe('API Endpoints', () => {
         if (!req.user) {
           return res.status(401).json({
             success: false,
-            error: 'Authentication required'
+            error: 'Authentication required',
           });
         }
       };
@@ -167,11 +164,11 @@ describe('API Endpoints', () => {
       mockRequest.body = {
         categories: ['video', 'music'],
         language: 'en',
-        explicit: false
+        explicit: false,
       };
 
       const preferencesService = {
-        updatePreferences: vi.fn().mockResolvedValue(true)
+        updatePreferences: vi.fn().mockResolvedValue(true),
       };
 
       const handleUpdatePreferences = async (req, res) => {
@@ -187,7 +184,7 @@ describe('API Endpoints', () => {
       );
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
-        message: 'Preferences updated'
+        message: 'Preferences updated',
       });
     });
 
@@ -195,14 +192,14 @@ describe('API Endpoints', () => {
       mockRequest.user = { id: 'user-123' };
       mockRequest.body = {
         categories: 'invalid', // Should be array
-        language: 123 // Should be string
+        language: 123, // Should be string
       };
 
       const handleUpdatePreferences = async (req, res) => {
         if (!Array.isArray(req.body.categories)) {
           return res.status(400).json({
             success: false,
-            error: 'Categories must be an array'
+            error: 'Categories must be an array',
           });
         }
       };
@@ -216,7 +213,7 @@ describe('API Endpoints', () => {
   describe('Error Handling', () => {
     it('should handle database errors gracefully', async () => {
       const searchService = {
-        search: vi.fn().mockRejectedValue(new Error('Database connection failed'))
+        search: vi.fn().mockRejectedValue(new Error('Database connection failed')),
       };
 
       const handleSearch = async (req, res) => {
@@ -225,7 +222,7 @@ describe('API Endpoints', () => {
         } catch (error) {
           res.status(500).json({
             success: false,
-            error: 'Internal server error'
+            error: 'Internal server error',
           });
         }
       };
@@ -236,20 +233,20 @@ describe('API Endpoints', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(500);
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: false,
-        error: 'Internal server error'
+        error: 'Internal server error',
       });
     });
 
     it('should handle rate limiting', async () => {
       const rateLimiter = {
-        checkLimit: vi.fn().mockReturnValue(false)
+        checkLimit: vi.fn().mockReturnValue(false),
       };
 
       const rateLimitMiddleware = (req, res, next) => {
         if (!rateLimiter.checkLimit(req.user?.id || req.ip)) {
           return res.status(429).json({
             success: false,
-            error: 'Too many requests'
+            error: 'Too many requests',
           });
         }
         next();

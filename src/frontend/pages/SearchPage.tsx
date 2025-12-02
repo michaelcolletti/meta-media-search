@@ -13,13 +13,13 @@ export function SearchPage() {
   const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'map' | 'grid'>('map');
 
-  const query = useAppStore((state) => state.query);
-  const searchResults = useAppStore((state) => state.searchResults);
-  const vizConfig = useAppStore((state) => state.vizConfig);
-  const selectedContent = useAppStore((state) => state.selectedContent);
-  const setSelectedContent = useAppStore((state) => state.setSelectedContent);
-  const setSearchResults = useAppStore((state) => state.setSearchResults);
-  const setQuery = useAppStore((state) => state.setQuery);
+  const query = useAppStore(state => state.query);
+  const searchResults = useAppStore(state => state.searchResults);
+  const vizConfig = useAppStore(state => state.vizConfig);
+  const selectedContent = useAppStore(state => state.selectedContent);
+  const setSelectedContent = useAppStore(state => state.setSelectedContent);
+  const setSearchResults = useAppStore(state => state.setSearchResults);
+  const setQuery = useAppStore(state => state.setQuery);
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -64,12 +64,8 @@ export function SearchPage() {
     <div className="search-page">
       <div className="search-header">
         <div className="search-info">
-          <h1 className="search-title">
-            {searchResults.metadata.totalResults} results
-          </h1>
-          <p className="search-subtitle">
-            Found in {searchResults.metadata.queryTime}ms
-          </p>
+          <h1 className="search-title">{searchResults.metadata.totalResults} results</h1>
+          <p className="search-subtitle">Found in {searchResults.metadata.queryTime}ms</p>
         </div>
 
         <div className="search-view-toggle">
@@ -120,7 +116,7 @@ export function SearchPage() {
           </div>
         ) : (
           <div className="search-grid">
-            {searchResults.nodes.map((node) => (
+            {searchResults.nodes.map(node => (
               <ContentCard
                 key={node.id}
                 content={node.content}
@@ -131,10 +127,7 @@ export function SearchPage() {
         )}
       </div>
 
-      <ContentDetailPanel
-        content={selectedContent}
-        onClose={() => setSelectedContent(null)}
-      />
+      <ContentDetailPanel content={selectedContent} onClose={() => setSelectedContent(null)} />
     </div>
   );
 }

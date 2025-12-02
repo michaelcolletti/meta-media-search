@@ -8,10 +8,7 @@ import { DatabaseError, NotFoundError, ValidationError } from '../utils/errors.j
 class UserModel {
   async findById(id: string): Promise<User | null> {
     try {
-      const result = await db.query<User>(
-        'SELECT * FROM users WHERE id = $1',
-        [id]
-      );
+      const result = await db.query<User>('SELECT * FROM users WHERE id = $1', [id]);
 
       return result.rows[0] || null;
     } catch (error) {
@@ -22,10 +19,7 @@ class UserModel {
 
   async findByEmail(email: string): Promise<User | null> {
     try {
-      const result = await db.query<User>(
-        'SELECT * FROM users WHERE email = $1',
-        [email]
-      );
+      const result = await db.query<User>('SELECT * FROM users WHERE email = $1', [email]);
 
       return result.rows[0] || null;
     } catch (error) {

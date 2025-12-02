@@ -9,10 +9,10 @@ interface ContentDetailPanelProps {
 }
 
 export function ContentDetailPanel({ content, onClose }: ContentDetailPanelProps) {
-  const bookmarks = useAppStore((state) => state.bookmarks);
-  const addBookmark = useAppStore((state) => state.addBookmark);
-  const removeBookmark = useAppStore((state) => state.removeBookmark);
-  const addToWatchHistory = useAppStore((state) => state.addToWatchHistory);
+  const bookmarks = useAppStore(state => state.bookmarks);
+  const addBookmark = useAppStore(state => state.addBookmark);
+  const removeBookmark = useAppStore(state => state.removeBookmark);
+  const addToWatchHistory = useAppStore(state => state.addToWatchHistory);
 
   if (!content) return null;
 
@@ -96,7 +96,7 @@ export function ContentDetailPanel({ content, onClose }: ContentDetailPanelProps
               <div className="content-detail-section">
                 <h3>Genres</h3>
                 <div className="content-detail-genres">
-                  {content.genres.map((genre) => (
+                  {content.genres.map(genre => (
                     <span key={genre} className="content-detail-genre">
                       {genre}
                     </span>
@@ -108,7 +108,7 @@ export function ContentDetailPanel({ content, onClose }: ContentDetailPanelProps
                 <div className="content-detail-section">
                   <h3>Mood</h3>
                   <div className="content-detail-moods">
-                    {content.mood.map((mood) => (
+                    {content.mood.map(mood => (
                       <span key={mood} className="content-detail-mood">
                         {mood}
                       </span>
@@ -130,7 +130,9 @@ export function ContentDetailPanel({ content, onClose }: ContentDetailPanelProps
                         <span className="content-detail-platform-name">{platform.name}</span>
                         <span className="content-detail-platform-type">{platform.type}</span>
                         {platform.quality && (
-                          <span className="content-detail-platform-quality">{platform.quality}</span>
+                          <span className="content-detail-platform-quality">
+                            {platform.quality}
+                          </span>
                         )}
                       </button>
                     ))}

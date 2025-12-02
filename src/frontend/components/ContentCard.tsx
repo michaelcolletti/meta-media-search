@@ -12,9 +12,9 @@ interface ContentCardProps {
 
 export function ContentCard({ content, onClick, variant = 'default' }: ContentCardProps) {
   const [imageError, setImageError] = useState(false);
-  const bookmarks = useAppStore((state) => state.bookmarks);
-  const addBookmark = useAppStore((state) => state.addBookmark);
-  const removeBookmark = useAppStore((state) => state.removeBookmark);
+  const bookmarks = useAppStore(state => state.bookmarks);
+  const addBookmark = useAppStore(state => state.addBookmark);
+  const removeBookmark = useAppStore(state => state.removeBookmark);
 
   const isBookmarked = bookmarks.includes(content.id);
 
@@ -38,11 +38,7 @@ export function ContentCard({ content, onClick, variant = 'default' }: ContentCa
     >
       <div className="content-card-image">
         {!imageError && content.poster ? (
-          <img
-            src={content.poster}
-            alt={content.title}
-            onError={() => setImageError(true)}
-          />
+          <img src={content.poster} alt={content.title} onError={() => setImageError(true)} />
         ) : (
           <div className="content-card-placeholder">
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -95,7 +91,7 @@ export function ContentCard({ content, onClick, variant = 'default' }: ContentCa
         )}
 
         <div className="content-card-genres">
-          {content.genres.slice(0, 3).map((genre) => (
+          {content.genres.slice(0, 3).map(genre => (
             <span key={genre} className="content-card-genre">
               {genre}
             </span>

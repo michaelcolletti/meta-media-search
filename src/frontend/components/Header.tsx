@@ -7,8 +7,8 @@ import './Header.css';
 
 export function Header() {
   const navigate = useNavigate();
-  const tutorial = useAppStore((state) => state.tutorial);
-  const updateTutorial = useAppStore((state) => state.updateTutorial);
+  const tutorial = useAppStore(state => state.tutorial);
+  const updateTutorial = useAppStore(state => state.updateTutorial);
 
   const handleTutorialClick = () => {
     updateTutorial({ isActive: true, currentStep: 0 });

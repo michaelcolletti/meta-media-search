@@ -12,7 +12,9 @@ test.describe('Accessibility - WCAG 2.1 AA Compliance @accessibility', () => {
     await page.goto('/');
   });
 
-  test('homepage should not have automatically detectable accessibility issues', async ({ page }) => {
+  test('homepage should not have automatically detectable accessibility issues', async ({
+    page,
+  }) => {
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       .analyze();
@@ -67,18 +69,16 @@ test.describe('Accessibility - WCAG 2.1 AA Compliance @accessibility', () => {
   });
 
   test('should have sufficient color contrast', async ({ page }) => {
-    const results = await new AxeBuilder({ page })
-      .withTags(['cat.color'])
-      .analyze();
+    const results = await new AxeBuilder({ page }).withTags(['cat.color']).analyze();
 
     expect(results.violations).toEqual([]);
   });
 
   test('interactive elements should be keyboard accessible', async ({ page }) => {
     // Tab through interactive elements
-    const interactiveElements = await page.locator(
-      'a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    ).all();
+    const interactiveElements = await page
+      .locator('a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])')
+      .all();
 
     expect(interactiveElements.length).toBeGreaterThan(0);
 
@@ -131,7 +131,7 @@ test.describe('Accessibility - WCAG 2.1 AA Compliance @accessibility', () => {
     // If modal/dialog functionality exists
     const modalTrigger = page.locator('[data-testid="open-modal"]');
 
-    if (await modalTrigger.count() > 0) {
+    if ((await modalTrigger.count()) > 0) {
       await modalTrigger.click();
 
       // Focus should be trapped in modal
@@ -140,9 +140,12 @@ test.describe('Accessibility - WCAG 2.1 AA Compliance @accessibility', () => {
 
       // First focusable element should be focused
       const focusedElement = page.locator(':focus');
-      const isInsideModal = await focusedElement.evaluate((el, modalEl) => {
-        return modalEl.contains(el);
-      }, await modal.elementHandle());
+      const isInsideModal = await focusedElement.evaluate(
+        (el, modalEl) => {
+          return modalEl.contains(el);
+        },
+        await modal.elementHandle()
+      );
 
       expect(isInsideModal).toBe(true);
 
@@ -163,9 +166,7 @@ test.describe('Accessibility - WCAG 2.1 AA Compliance @accessibility', () => {
   });
 
   test('should support screen reader navigation', async ({ page }) => {
-    const results = await new AxeBuilder({ page })
-      .withTags(['best-practice'])
-      .analyze();
+    const results = await new AxeBuilder({ page }).withTags(['best-practice']).analyze();
 
     expect(results.violations).toEqual([]);
   });
@@ -194,8 +195,7 @@ test.describe('Accessibility - WCAG 2.1 AA Compliance @accessibility', () => {
     // Set viewport to simulate zoom
     await page.setViewportSize({ width: 800, height: 600 });
 
-    const results = await new AxeBuilder({ page })
-      .analyze();
+    const results = await new AxeBuilder({ page }).analyze();
 
     expect(results.violations).toEqual([]);
 
@@ -212,7 +212,7 @@ test.describe('Accessibility - WCAG 2.1 AA Compliance @accessibility', () => {
     // Submit form with errors
     const form = page.locator('form').first();
 
-    if (await form.count() > 0) {
+    if ((await form.count()) > 0) {
       await form.locator('button[type="submit"]').click();
 
       // Error messages should be associated with fields
@@ -229,15 +229,13 @@ test.describe('Accessibility - WCAG 2.1 AA Compliance @accessibility', () => {
 test.describe('Mobile Accessibility @accessibility', () => {
   test.use({
     viewport: { width: 375, height: 667 },
-    hasTouch: true
+    hasTouch: true,
   });
 
   test('should be accessible on mobile viewport', async ({ page }) => {
     await page.goto('/');
 
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa'])
-      .analyze();
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
 
     expect(results.violations).toEqual([]);
   });
@@ -248,9 +246,10 @@ test.describe('Mobile Accessibility @accessibility', () => {
     // Touch targets should be at least 44x44px
     const buttons = await page.locator('button, a').all();
 
-    for (const button of buttons.slice(0, 5)) { // Check first 5
+    for (const button of buttons.slice(0, 5)) {
+      // Check first 5
       const box = await button.boundingBox();
-      if (box && await button.isVisible()) {
+      if (box && (await button.isVisible())) {
         expect(box.width).toBeGreaterThanOrEqual(44);
         expect(box.height).toBeGreaterThanOrEqual(44);
       }

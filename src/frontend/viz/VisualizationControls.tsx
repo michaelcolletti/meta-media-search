@@ -3,8 +3,8 @@ import type { VisualizationConfig } from '@types/index';
 import './VisualizationControls.css';
 
 export function VisualizationControls() {
-  const vizConfig = useAppStore((state) => state.vizConfig);
-  const updateVizConfig = useAppStore((state) => state.updateVizConfig);
+  const vizConfig = useAppStore(state => state.vizConfig);
+  const updateVizConfig = useAppStore(state => state.updateVizConfig);
 
   const handleLayoutChange = (layout: VisualizationConfig['layout']) => {
     updateVizConfig({ layout });
@@ -31,7 +31,7 @@ export function VisualizationControls() {
       <div className="viz-control-group">
         <label className="viz-control-label">Layout</label>
         <div className="viz-control-buttons">
-          {(['force', 'hierarchical', 'circular', 'grid'] as const).map((layout) => (
+          {(['force', 'hierarchical', 'circular', 'grid'] as const).map(layout => (
             <button
               key={layout}
               className={`viz-control-button ${vizConfig.layout === layout ? 'active' : ''}`}
@@ -46,7 +46,7 @@ export function VisualizationControls() {
       <div className="viz-control-group">
         <label className="viz-control-label">Color by</label>
         <div className="viz-control-buttons">
-          {(['genre', 'type', 'platform', 'mood'] as const).map((scheme) => (
+          {(['genre', 'type', 'platform', 'mood'] as const).map(scheme => (
             <button
               key={scheme}
               className={`viz-control-button ${vizConfig.colorScheme === scheme ? 'active' : ''}`}
@@ -61,7 +61,7 @@ export function VisualizationControls() {
       <div className="viz-control-group">
         <label className="viz-control-label">Node size</label>
         <div className="viz-control-buttons">
-          {(['fixed', 'popularity', 'rating'] as const).map((size) => (
+          {(['fixed', 'popularity', 'rating'] as const).map(size => (
             <button
               key={size}
               className={`viz-control-button ${vizConfig.nodeSize === size ? 'active' : ''}`}
@@ -93,10 +93,7 @@ export function VisualizationControls() {
             </svg>
             Clustering
           </button>
-          <button
-            className={`viz-toggle ${vizConfig.show3D ? 'active' : ''}`}
-            onClick={toggle3D}
-          >
+          <button className={`viz-toggle ${vizConfig.show3D ? 'active' : ''}`} onClick={toggle3D}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               {vizConfig.show3D ? (
                 <path
