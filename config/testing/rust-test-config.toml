@@ -1,0 +1,84 @@
+# Rust Test Configuration for Meta Media Search
+# This configuration defines test behavior, coverage targets, and performance thresholds
+
+[test]
+# Test execution settings
+threads = 4
+timeout = 60
+show_output = true
+color = "always"
+
+[test.unit]
+# Unit test specific settings
+enabled = true
+coverage_threshold = 90.0
+fail_on_warnings = true
+parallel = true
+
+[test.integration]
+# Integration test settings
+enabled = true
+coverage_threshold = 85.0
+timeout = 120
+setup_timeout = 30
+
+[test.bench]
+# Benchmark settings
+enabled = true
+iterations = 1000
+warmup = 100
+measurement_time = 5
+
+[coverage]
+# Coverage reporting
+enabled = true
+format = ["html", "lcov", "json"]
+exclude = [
+    "tests/*",
+    "benches/*",
+    "examples/*",
+]
+branches_threshold = 75.0
+lines_threshold = 90.0
+
+[performance]
+# Performance thresholds
+max_vector_op_time_ms = 1.0
+max_knn_search_time_ms = 50.0
+max_batch_similarity_time_ms = 100.0
+
+# Memory limits
+max_memory_mb = 512
+max_heap_growth_mb = 100
+
+[wasm]
+# WebAssembly specific settings
+target = "wasm32-unknown-unknown"
+optimize = true
+debug = false
+reference_types = true
+
+[wasm.build]
+# WASM build options
+opt_level = 3
+lto = true
+codegen_units = 1
+
+[wasm.test]
+# WASM test configuration
+headless = true
+browsers = ["chrome", "firefox"]
+timeout = 30
+
+[quality]
+# Code quality thresholds
+max_complexity = 10
+max_function_lines = 50
+max_file_lines = 500
+allow_warnings = false
+
+[ci]
+# Continuous integration settings
+fail_fast = false
+run_benchmarks = true
+upload_coverage = true

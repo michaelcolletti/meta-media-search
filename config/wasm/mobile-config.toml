@@ -1,0 +1,209 @@
+# Mobile WASM Build Configuration
+# Optimized for mobile browsers with size and performance constraints
+
+[package]
+name = "meta-media-mobile-wasm"
+version = "0.1.0"
+
+[build]
+target = "wasm32-unknown-unknown"
+profile = "release"
+
+# Build optimization settings
+[build.optimization]
+# Maximum size optimization
+opt_level = "z"           # Optimize for size
+lto = true                # Enable Link Time Optimization
+codegen_units = 1         # Single codegen unit for better optimization
+debug = false             # Remove debug info
+strip = true              # Strip symbols
+panic = "abort"           # Smaller panic handler
+
+# Size targets
+max_bundle_size = 524288  # 512KB max (compressed)
+target_size = 460800      # 450KB target (compressed)
+warn_size = 512000        # 500KB warning threshold
+
+[wasm-pack]
+# Wasm-pack specific configuration
+profile = "release"
+target = "bundler"        # For webpack/vite bundling
+scope = "@meta-media"     # NPM scope
+
+[wasm-pack.profile.release]
+# Additional wasm-pack optimizations
+wasm-opt = true           # Run wasm-opt
+wasm-opt-args = [
+  "-O4",                  # Maximum optimization
+  "--enable-mutable-globals",
+  "--enable-sign-ext",
+  "--enable-simd",        # Enable SIMD if supported
+]
+
+[features]
+# Feature flags for conditional compilation
+default = ["console_error_panic_hook"]
+dev = ["console_error_panic_hook", "wee_alloc"]
+
+# Mobile-specific features
+mobile = [
+  "small-binary",
+  "fast-startup",
+  "offline-first"
+]
+
+small-binary = []         # Ultra-small binary mode
+fast-startup = []         # Optimized initialization
+offline-first = []        # Offline capabilities
+
+[dependencies]
+# Core dependencies with size optimization
+wasm-bindgen = { version = "0.2", default-features = false }
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0", default-features = false }
+
+# Web platform
+web-sys = { version = "0.3", features = [
+  "console",
+  "Window",
+  "Performance",
+  "Storage",
+  "IdbDatabase"
+]}
+
+# Memory optimization
+[memory]
+# Initial memory: 1MB (1 page = 64KB, so 16 pages)
+initial = 16
+# Maximum memory: 32MB (512 pages)
+maximum = 512
+# Shared memory
+shared = false
+# Memory64
+memory64 = false
+
+[compression]
+# Compression settings for bundle
+enabled = true
+algorithm = "brotli"      # Brotli compression
+quality = 11              # Maximum compression
+fallback = "gzip"         # Gzip fallback
+
+[performance]
+# Performance optimization targets
+startup_time_ms = 2000    # Max 2s on 3G
+parse_time_ms = 500       # Max 500ms parse time
+compile_time_ms = 1000    # Max 1s compile time
+
+# Bundle loading strategy
+loading_strategy = "lazy"  # Lazy load by default
+preload = false           # Don't preload
+cache_enabled = true      # Enable browser caching
+cache_duration = 86400    # 24 hours
+
+[mobile]
+# Mobile-specific optimizations
+browser_targets = [
+  "iOS >= 12",
+  "Android >= 8",
+  "ChromeAndroid >= 80",
+  "Safari >= 12"
+]
+
+# Connection type optimizations
+[mobile.network]
+min_connection = "3g"     # Minimum 3G connection
+timeout_ms = 10000        # 10s timeout
+retry_attempts = 3        # 3 retry attempts
+retry_delay_ms = 1000     # 1s retry delay
+
+# Device capability checks
+[mobile.capabilities]
+min_memory_mb = 512       # Minimum 512MB RAM
+check_battery = true      # Check battery status
+low_power_mode = true     # Support low power mode
+
+[service-worker]
+# Service worker configuration for offline
+enabled = true
+cache_name = "meta-media-wasm-v1"
+cache_strategy = "cache-first"
+precache = [
+  "/wasm/meta-media-mobile-wasm_bg.wasm",
+  "/wasm/meta-media-mobile-wasm.js"
+]
+
+[indexeddb]
+# IndexedDB configuration
+database_name = "meta-media-offline"
+version = 1
+stores = [
+  { name = "media", keyPath = "id", indexes = ["timestamp"] },
+  { name = "searches", keyPath = "query", indexes = ["timestamp"] },
+  { name = "preferences", keyPath = "key" }
+]
+max_size_mb = 50          # 50MB max storage
+
+[monitoring]
+# Performance monitoring
+enabled = true
+metrics = [
+  "load_time",
+  "parse_time",
+  "compile_time",
+  "memory_usage",
+  "cache_hit_rate"
+]
+
+# Error tracking
+error_reporting = true
+error_sample_rate = 1.0   # 100% error reporting
+
+[logging]
+# Logging configuration
+level = "warn"            # Production: warn level
+console_output = true
+include_timestamps = true
+include_source = false    # Remove source maps in prod
+
+[security]
+# Security settings
+cors_enabled = true
+csp_enabled = true
+integrity_check = true    # Subresource integrity
+
+[deployment]
+# Deployment configuration
+cdn_enabled = true
+cdn_path = "/wasm"
+versioning = "hash"       # Use content hash for versioning
+immutable = true          # Immutable caching
+
+# CDN configuration
+[deployment.cdn]
+provider = "cloudflare"
+zone = "production"
+ttl = 31536000           # 1 year cache
+
+[testing]
+# Testing configuration
+headless = true
+browsers = ["chrome", "firefox", "safari"]
+test_timeout_ms = 30000  # 30s test timeout
+
+# Performance benchmarks
+[testing.benchmarks]
+enabled = true
+targets = {
+  bundle_size = 460800,  # 450KB
+  load_time = 2000,      # 2s on 3G
+  memory = 16777216      # 16MB max
+}
+
+[agentdb]
+# AgentDB integration settings
+enabled = true
+namespace = "meta-media-mobile"
+sync_interval_ms = 30000  # 30s sync
+offline_mode = true
+compression = true
