@@ -6,8 +6,8 @@
 //! - Performance characteristics
 //! - Error handling
 
-use meta_media_wasm::*;
 use approx::assert_relative_eq;
+use meta_media_wasm::*;
 
 #[cfg(test)]
 mod vector_operations {
@@ -83,9 +83,9 @@ mod vector_operations {
     fn test_knn_search_basic() {
         let query = vec![1.0, 0.0, 0.0];
         let vectors = vec![
-            1.0, 0.0, 0.0,  // Should be rank 1 (similarity = 1.0)
-            0.8, 0.6, 0.0,  // Should be rank 2
-            0.0, 1.0, 0.0,  // Should be rank 3
+            1.0, 0.0, 0.0, // Should be rank 1 (similarity = 1.0)
+            0.8, 0.6, 0.0, // Should be rank 2
+            0.0, 1.0, 0.0, // Should be rank 3
             -1.0, 0.0, 0.0, // Should be rank 4 (similarity = -1.0)
         ];
 
@@ -120,11 +120,7 @@ mod vector_operations {
     #[test]
     fn test_batch_cosine_similarity() {
         let query = vec![1.0, 0.0, 0.0];
-        let vectors = vec![
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            0.0, 0.0, 1.0,
-        ];
+        let vectors = vec![1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0];
 
         let results = batch_cosine_similarity(&query, &vectors, 3).unwrap();
         assert_eq!(results.len(), 3);

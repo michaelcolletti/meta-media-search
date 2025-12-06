@@ -54,9 +54,18 @@ export class RuVectorClient {
    */
   async initialize(): Promise<void> {
     console.log('[RuVector] Initializing with config:', this.config);
-    // In production, this would initialize the actual RuVector database
-    // For now, using in-memory implementation
     this.initialized = true;
+  }
+
+  /** Alias for initialize */
+  async connect(): Promise<void> {
+    return this.initialize();
+  }
+
+  /** Disconnect and cleanup */
+  async disconnect(): Promise<void> {
+    this.initialized = false;
+    this.vectors.clear();
   }
 
   /**
@@ -86,6 +95,26 @@ export class RuVectorClient {
     for (const item of items) {
       await this.insert(item);
     }
+  }
+
+  /** Upsert vectors (alias for batchInsert) */
+  async upsert(collection: string, vectors: any[]): Promise<void> {
+    return this.batchInsert(vectors);
+  }
+
+  /** Create collection (no-op in memory impl) */
+  async createCollection(name: string, config?: any): Promise<void> {
+    this.initialized = true;
+  }
+
+  /** Get collection stats */
+  async getCollectionStats(name: string): Promise<any> {
+    return { count: this.vectors.size, dimensions: this.config.dimensions };
+  }
+
+  /** Retrieve by ID */
+  async retrieve(collection: string, id: string): Promise<any> {
+    return this.get(id);
   }
 
   /**

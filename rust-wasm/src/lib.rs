@@ -6,9 +6,9 @@
 //! - Vector normalization
 //! - Batch processing
 
-use wasm_bindgen::prelude::*;
 use ndarray::{Array1, Array2};
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -99,7 +99,8 @@ pub fn knn_search(
     similarities.sort_by(|a, b| b.similarity.partial_cmp(&a.similarity).unwrap());
 
     // Return top K results
-    let top_k = similarities.iter()
+    let top_k = similarities
+        .iter()
         .take(k.min(num_vectors))
         .map(|r| JsValue::from_serde(r).unwrap())
         .collect();
