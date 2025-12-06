@@ -1,0 +1,453 @@
+# Rust/WASM Module Architecture Configuration
+# Meta-Media-Search Platform
+# Version: 1.0.0
+
+[project]
+name = "meta-media-wasm"
+version = "0.1.0"
+edition = "2021"
+authors = ["Meta-Media Architecture Team"]
+description = "High-performance WASM modules for vector operations, embeddings, and ranking"
+repository = "https://github.com/michaelcolletti/meta-media-search"
+license = "MIT"
+
+# ============================================================================
+# MODULE DEFINITIONS
+# ============================================================================
+
+[modules.vector_ops]
+name = "vector-ops"
+path = "src/modules/vector_ops"
+description = "High-performance vector similarity calculations and indexing"
+enabled = true
+priority = "high"
+dependencies = ["ndarray", "rayon", "hnsw"]
+
+[modules.vector_ops.features]
+simd = true                    # Enable SIMD optimizations
+parallel = true                # Enable multi-threading with rayon
+hnsw_index = true             # Hierarchical Navigable Small World index
+ivf_index = false             # Inverted File index (future)
+gpu_acceleration = false      # GPU support via WebGPU (future)
+
+[modules.vector_ops.performance]
+target_latency_ms = 10        # Target latency for 1000 vector comparisons
+batch_size_default = 128      # Default batch size for operations
+cache_size_mb = 50            # WASM memory cache size
+
+[modules.vector_ops.api]
+functions = [
+    "cosine_similarity",
+    "batch_similarity",
+    "dot_product",
+    "normalize",
+    "build_index",
+    "search_index"
+]
+
+# ----------------------------------------------------------------------------
+
+[modules.embedding]
+name = "embedding"
+path = "src/modules/embedding"
+description = "Generate vector embeddings from text and images"
+enabled = true
+priority = "high"
+dependencies = ["tokenizers", "candle-core", "serde"]
+
+[modules.embedding.models]
+# Supported embedding models
+minilm = { dimension = 384, size_mb = 80, quality = "fast" }
+sentence_bert = { dimension = 768, size_mb = 150, quality = "balanced" }
+mpnet = { dimension = 768, size_mb = 160, quality = "high" }
+e5_large = { dimension = 1024, size_mb = 350, quality = "sota" }
+
+[modules.embedding.features]
+lazy_loading = true           # Load models on-demand
+model_caching = true          # Cache loaded models in memory
+batch_encoding = true         # Support batch text encoding
+streaming = true              # Support streaming for long texts
+multimodal = false            # Text + image fusion (future)
+
+[modules.embedding.performance]
+target_latency_ms = 30        # Target latency for single text encoding
+batch_size_default = 32       # Default batch size
+max_sequence_length = 512     # Maximum token sequence length
+
+[modules.embedding.api]
+functions = [
+    "encode_text",
+    "encode_batch",
+    "encode_long_text",
+    "dimension"
+]
+
+# ----------------------------------------------------------------------------
+
+[modules.ranking]
+name = "ranking"
+path = "src/modules/ranking"
+description = "Hybrid ranking combining semantic, popularity, and personalization"
+enabled = true
+priority = "medium"
+dependencies = ["serde", "serde_json"]
+
+[modules.ranking.weights]
+# Default ranking weights (can be overridden at runtime)
+semantic_similarity = 0.5
+popularity = 0.2
+recency = 0.1
+personalization = 0.15
+diversity = 0.05
+
+[modules.ranking.algorithms]
+mmr = true                    # Maximal Marginal Relevance for diversity
+bm25 = false                  # BM25 text ranking (future)
+learning_to_rank = false      # ML-based ranking (future)
+
+[modules.ranking.performance]
+target_latency_ms = 15        # Target latency for ranking 500 items
+max_candidates = 1000         # Maximum candidates to rank
+
+[modules.ranking.api]
+functions = [
+    "rank",
+    "rerank",
+    "diversity_optimize",
+    "calculate_score"
+]
+
+# ----------------------------------------------------------------------------
+
+[modules.clustering]
+name = "clustering"
+path = "src/modules/clustering"
+description = "Cluster similar content for discovery visualization"
+enabled = true
+priority = "low"
+dependencies = ["ndarray", "rayon"]
+
+[modules.clustering.algorithms]
+kmeans = { enabled = true, default_k = 10, max_iterations = 100 }
+dbscan = { enabled = true, default_eps = 0.3, default_min_samples = 5 }
+hierarchical = { enabled = false }  # Future implementation
+
+[modules.clustering.features]
+incremental = true            # Support incremental clustering
+auto_labeling = true          # Generate cluster labels from metadata
+
+[modules.clustering.performance]
+target_latency_ms = 500       # Target latency for 10k vectors
+max_vectors = 50000           # Maximum vectors to cluster
+
+[modules.clustering.api]
+functions = [
+    "cluster",
+    "incremental_cluster",
+    "label_clusters"
+]
+
+# ============================================================================
+# BRIDGE LAYER CONFIGURATION
+# ============================================================================
+
+[bridge]
+name = "wasm-bridge"
+path = "src/bridge"
+description = "JavaScript ↔ WASM communication layer"
+
+[bridge.memory]
+initial_pages = 256           # 16MB initial memory (256 * 64KB)
+maximum_pages = 4096          # 256MB maximum memory (4096 * 64KB)
+shared_memory = true          # Enable SharedArrayBuffer
+grow_strategy = "exponential" # Memory growth strategy
+
+[bridge.serialization]
+format = "json"               # JSON for complex objects
+binary_format = "msgpack"     # MessagePack for binary data (future)
+zero_copy = true              # Enable zero-copy transfers
+
+[bridge.error_handling]
+panic_hook = "console_error_panic_hook"
+stack_traces = true
+custom_errors = true
+
+# ============================================================================
+# PLATFORM-SPECIFIC CONFIGURATIONS
+# ============================================================================
+
+[platforms.browser]
+enabled = true
+target = "web"
+features = [
+    "web-sys",
+    "js-sys",
+    "wasm-bindgen-futures"
+]
+
+[platforms.browser.optimizations]
+code_splitting = true         # Split large modules
+lazy_loading = true           # Load modules on demand
+service_worker_cache = true   # Cache WASM modules in service worker
+
+[platforms.browser.compatibility]
+min_chrome = 90
+min_firefox = 89
+min_safari = 14
+min_edge = 90
+
+# ----------------------------------------------------------------------------
+
+[platforms.nodejs]
+enabled = true
+target = "nodejs"
+features = [
+    "wasm-bindgen-rayon"      # Multi-threading support
+]
+
+[platforms.nodejs.optimizations]
+native_modules = false        # Use pure WASM (no native addons)
+worker_threads = true         # Enable worker thread pool
+
+# ----------------------------------------------------------------------------
+
+[platforms.mobile]
+enabled = true
+target = "react-native"
+
+[platforms.mobile.optimizations]
+memory_limit_mb = 200         # Conservative memory limit
+batch_size = 16               # Smaller batches for mobile
+compression = true            # Compress stored embeddings
+
+[platforms.mobile.compatibility]
+min_ios = "14.0"
+min_android = "10.0"
+
+# ============================================================================
+# BUILD CONFIGURATION
+# ============================================================================
+
+[build]
+profile = "release"
+
+[build.release]
+opt_level = "z"               # Optimize for size
+lto = true                    # Link-time optimization
+codegen_units = 1             # Single codegen unit
+panic = "abort"               # Smaller binary
+strip = true                  # Remove debug symbols
+
+[build.wasm_pack]
+target = ["web", "nodejs", "bundler"]
+out_dir = "../pkg"
+scope = "@meta-media"
+
+[build.optimization]
+wasm_opt = true               # Run wasm-opt after build
+wasm_opt_level = "z"          # Optimize for size
+wasm_opt_passes = [
+    "--strip-debug",
+    "--strip-producers",
+    "--vacuum"
+]
+
+# ============================================================================
+# DEPENDENCIES
+# ============================================================================
+
+[dependencies.core]
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.6"
+serde_json = "1.0"
+
+[dependencies.math]
+ndarray = "0.15"
+rayon = "1.7"
+
+[dependencies.ml]
+tokenizers = "0.19"
+candle-core = "0.7"
+
+[dependencies.vector_search]
+hnsw = "0.11"
+
+[dependencies.utils]
+thiserror = "1.0"
+lazy_static = "1.4"
+console_error_panic_hook = "0.1"
+
+# ============================================================================
+# TESTING
+# ============================================================================
+
+[testing]
+framework = "wasm-bindgen-test"
+browser_tests = true
+node_tests = true
+
+[testing.coverage]
+enabled = true
+target = 80                   # 80% code coverage target
+tool = "cargo-tarpaulin"
+
+[testing.benchmarks]
+enabled = true
+framework = "criterion"
+baseline = "main"
+
+# ============================================================================
+# MONITORING & OBSERVABILITY
+# ============================================================================
+
+[monitoring]
+enabled = true
+
+[monitoring.metrics]
+performance = true            # Track operation latencies
+memory = true                 # Track memory usage
+errors = true                 # Track error rates
+
+[monitoring.logging]
+level = "info"
+structured = true
+format = "json"
+
+# ============================================================================
+# DEPLOYMENT
+# ============================================================================
+
+[deployment.npm]
+registry = "https://registry.npmjs.org/"
+access = "public"
+package_name = "@meta-media/wasm-modules"
+
+[deployment.cdn]
+enabled = true
+provider = "cloudflare"
+cache_ttl_seconds = 86400     # 24 hours
+
+[deployment.versioning]
+strategy = "semver"
+auto_increment = true
+
+# ============================================================================
+# FEATURE FLAGS
+# ============================================================================
+
+[features]
+default = [
+    "vector_ops",
+    "embedding",
+    "ranking",
+    "clustering"
+]
+
+# Individual feature toggles
+simd = []                     # SIMD optimizations
+parallel = ["rayon"]          # Parallel processing
+gpu = []                      # GPU acceleration (future)
+compression = []              # Data compression
+profiling = []                # Performance profiling
+
+# ============================================================================
+# INTEGRATION WITH EXISTING STACK
+# ============================================================================
+
+[integration.typescript]
+generate_types = true
+output_path = "../src/types/wasm-bindings.d.ts"
+
+[integration.ruvector]
+client_library = "ruvector-js"
+version = "0.3.0"
+connection_pool_size = 10
+
+[integration.agentdb]
+client_library = "agentdb-client"
+version = "1.2.0"
+
+[integration.postgresql]
+driver = "pg"
+version = "8.11.0"
+max_connections = 20
+
+[integration.redis]
+driver = "ioredis"
+version = "5.3.0"
+cluster_mode = false
+
+# ============================================================================
+# SECURITY
+# ============================================================================
+
+[security]
+content_security_policy = true
+sandbox_mode = true
+memory_isolation = true
+
+[security.wasm]
+validate_imports = true
+restrict_capabilities = [
+    "no_network_access",
+    "no_file_system_access"
+]
+
+# ============================================================================
+# DOCUMENTATION
+# ============================================================================
+
+[documentation]
+auto_generate = true
+format = ["markdown", "html"]
+output_path = "../docs/api/wasm"
+
+[documentation.examples]
+include = true
+path = "../examples/wasm"
+
+# ============================================================================
+# CI/CD
+# ============================================================================
+
+[ci]
+platform = "github_actions"
+workflows = [
+    ".github/workflows/wasm-build.yml",
+    ".github/workflows/wasm-test.yml",
+    ".github/workflows/wasm-deploy.yml"
+]
+
+[ci.build]
+on = ["push", "pull_request"]
+branches = ["main", "develop"]
+
+[ci.test]
+on = ["push", "pull_request"]
+browsers = ["chrome", "firefox", "safari"]
+
+[ci.deploy]
+on = ["release"]
+targets = ["npm", "cdn"]
+
+# ============================================================================
+# MAINTENANCE
+# ============================================================================
+
+[maintenance]
+update_schedule = "weekly"
+dependency_check = true
+security_audit = true
+performance_regression_check = true
+
+[maintenance.alerts]
+slack_webhook = "${SLACK_WEBHOOK_URL}"
+email = "dev@meta-media-search.com"
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

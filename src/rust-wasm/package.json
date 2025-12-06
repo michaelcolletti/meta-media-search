@@ -1,0 +1,39 @@
+{
+  "name": "@meta-media-search/wasm",
+  "version": "0.1.0",
+  "description": "High-performance vector operations for Meta Media Search",
+  "main": "pkg/meta_media_search_wasm.js",
+  "types": "pkg/meta_media_search_wasm.d.ts",
+  "files": [
+    "pkg/**/*"
+  ],
+  "scripts": {
+    "build": "./build.sh",
+    "build:dev": "./build.sh --dev",
+    "build:nodejs": "./build.sh --target nodejs",
+    "build:bundler": "./build.sh --target bundler",
+    "test": "cargo test && wasm-pack test --headless --chrome",
+    "bench": "cargo bench",
+    "clean": "cargo clean && rm -rf pkg/",
+    "check": "cargo check --target wasm32-unknown-unknown",
+    "clippy": "cargo clippy --target wasm32-unknown-unknown -- -D warnings",
+    "fmt": "cargo fmt --all -- --check"
+  },
+  "keywords": [
+    "wasm",
+    "webassembly",
+    "vector-search",
+    "embeddings",
+    "similarity-search",
+    "machine-learning"
+  ],
+  "author": "Meta Media Search Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/meta-media-search"
+  },
+  "devDependencies": {
+    "wasm-pack": "^0.12.1"
+  }
+}

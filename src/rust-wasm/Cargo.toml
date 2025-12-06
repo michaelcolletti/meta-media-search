@@ -1,0 +1,33 @@
+[package]
+name = "meta-media-wasm"
+version = "0.1.0"
+authors = ["Meta-Media-Search Team"]
+edition = "2021"
+description = "Rust/WASM components for high-performance media search"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies]
+wasm-bindgen = "0.2.92"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde-wasm-bindgen = "0.6"
+console_error_panic_hook = { version = "0.1.7", optional = true }
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = ["Window", "Document", "console"] }
+ndarray = "0.15"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
