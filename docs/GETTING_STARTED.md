@@ -1,257 +1,308 @@
 # Getting Started with Meta-Media-Search
 
-This guide will help you set up and run Meta-Media-Search on your local machine.
+Complete guide to set up and run the project locally.
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
+### Required Software
 
-- **Node.js** >= 18.0.0 ([Download](https://nodejs.org/))
-- **npm** >= 9.0.0 (comes with Node.js)
-- **PostgreSQL** >= 14 ([Download](https://www.postgresql.org/download/))
-- **Redis** >= 6 ([Download](https://redis.io/download))
-- **Git** ([Download](https://git-scm.com/downloads))
+1. **Node.js 20 LTS** (recommended) or 18+
+   ```bash
+   # Using nvm (recommended)
+   nvm install 20
+   nvm use 20
+   nvm alias default 20
+   ```
 
-## Step 1: Clone the Repository
+2. **Rust + wasm-pack** (for WASM compilation)
+   ```bash
+   # Install Rust
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   
+   # Install wasm-pack
+   curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+   ```
+
+3. **PostgreSQL 14+**
+   ```bash
+   # macOS
+   brew install postgresql@14
+   brew services start postgresql@14
+   
+   # Ubuntu/Debian
+   sudo apt-get install postgresql-14
+   sudo systemctl start postgresql
+   ```
+
+4. **Redis 6+**
+   ```bash
+   # macOS
+   brew install redis
+   brew services start redis
+   
+   # Ubuntu/Debian
+   sudo apt-get install redis-server
+   sudo systemctl start redis
+   ```
+
+### API Keys
+
+Get free API keys from:
+- **OpenAI**: https://platform.openai.com/api-keys
+- **TMDB**: https://www.themoviedb.org/settings/api
+
+## Installation
+
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/michaelcolletti/meta-media-search.git
 cd meta-media-search
 ```
 
-## Step 2: Install Dependencies
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-This will install all backend and frontend dependencies.
-
-## Step 3: Set Up API Keys
-
-You'll need API keys from the following services:
-
-### OpenAI API Key
-
-1. Go to [OpenAI Platform](https://platform.openai.com/)
-2. Sign up or log in
-3. Navigate to API Keys
-4. Create a new API key
-5. Copy the key (you won't be able to see it again)
-
-### TMDB API Key
-
-1. Go to [TMDB](https://www.themoviedb.org/)
-2. Create an account
-3. Go to Settings → API
-4. Request an API key (it's free)
-5. Copy the API key
-
-## Step 4: Configure Environment Variables
+### 3. Build WASM Components
 
 ```bash
-# Copy the example environment file
-cp config/.env.example .env
-
-# Edit the .env file with your favorite editor
-nano .env  # or vim .env, or code .env
+cd src/rust-wasm
+wasm-pack build --release --target web --out-dir pkg
+cd ../..
 ```
 
-Update the following values in `.env`:
+### 4. Configure Environment
 
+```bash
+cp config/.env.example .env
+```
+
+Edit `.env` with your API keys:
 ```env
-# AI Services - REQUIRED
-OPENAI_API_KEY=sk-your-openai-key-here
-TMDB_API_KEY=your-tmdb-api-key-here
+# AI Services
+OPENAI_API_KEY=sk-your-key-here
+TMDB_API_KEY=your-tmdb-key
 
-# Database - Update if different
-DATABASE_URL=postgresql://user:password@localhost:5432/meta_media_search
+# Database
+DATABASE_URL=postgresql://postgres:password@localhost:5432/meta_media_search
 REDIS_URL=redis://localhost:6379
 
-# Server - Can keep defaults
-PORT=3000
+# Server
 NODE_ENV=development
+PORT=3000
+API_VERSION=v1
+ALLOWED_ORIGINS=http://localhost:5173
+
+# Performance
+ENABLE_WASM=true
+ENABLE_COMPRESSION=true
 ```
 
-## Step 5: Set Up PostgreSQL
-
-### Create the Database
+### 5. Set Up Database
 
 ```bash
-# Connect to PostgreSQL
-psql -U postgres
+# Create database
+createdb meta_media_search
 
-# In psql, run:
-CREATE DATABASE meta_media_search;
-CREATE USER meta_user WITH PASSWORD 'your_password';
-GRANT ALL PRIVILEGES ON DATABASE meta_media_search TO meta_user;
-
-# Enable vector extension (for semantic search)
-\c meta_media_search
-CREATE EXTENSION IF NOT EXISTS vector;
-```
-
-### Run Migrations
-
-```bash
+# Run migrations
 npm run migrate
+
+# Optional: Seed with sample data
+npm run seed
 ```
 
-## Step 6: Start Redis
+### 6. Start Development Server
 
 ```bash
-# On macOS with Homebrew
-brew services start redis
-
-# Or run in foreground
-redis-server
-
-# Verify it's running
-redis-cli ping
-# Should return: PONG
-```
-
-## Step 7: Start the Development Servers
-
-```bash
-# Start both backend and frontend concurrently
 npm run dev
 ```
 
-This will start:
-- **Backend API** on http://localhost:3000
-- **Frontend** on http://localhost:5173
+This starts:
+- **Backend API**: http://localhost:3000
+- **Frontend**: http://localhost:5173
 
-## Step 8: Verify Everything Works
+## Docker Setup (Alternative)
 
-### Test the Backend
+If you prefer Docker:
 
 ```bash
-# Health check
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+## Verify Installation
+
+### 1. Check Services
+
+```bash
+# Backend health
 curl http://localhost:3000/health
 
-# Should return:
-# {"status":"healthy","service":"meta-media-search","timestamp":"..."}
+# Frontend
+open http://localhost:5173
 ```
 
-### Test the Frontend
-
-1. Open your browser to http://localhost:5173
-2. You should see the Meta-Media-Search homepage
-3. Try searching for "funny sci-fi movies like The Martian"
-
-## Common Issues & Solutions
-
-### Port Already in Use
-
-If port 3000 or 5173 is already in use:
-
-```bash
-# Change the port in .env
-PORT=3001  # for backend
-
-# For frontend, edit src/frontend/vite.config.ts
-server: {
-  port: 5174  # change this
-}
-```
-
-### Database Connection Error
-
-```bash
-# Verify PostgreSQL is running
-pg_isready
-
-# Check connection string in .env matches your setup
-# Format: postgresql://username:password@host:port/database
-```
-
-### Redis Connection Error
-
-```bash
-# Verify Redis is running
-redis-cli ping
-
-# If not running, start it:
-brew services start redis  # macOS
-sudo systemctl start redis  # Linux
-```
-
-### OpenAI API Key Invalid
-
-- Double-check you copied the entire key (starts with `sk-`)
-- Verify the key is active in your OpenAI dashboard
-- Check your OpenAI account has available credits
-
-### TMDB API Errors
-
-- Verify your API key is correct
-- TMDB has rate limits (40 requests per 10 seconds for free tier)
-- Check your API key is activated (can take a few minutes)
-
-## Development Workflow
-
-### Running Backend Only
-
-```bash
-npm run dev:backend
-```
-
-### Running Frontend Only
-
-```bash
-npm run dev:frontend
-```
-
-### Running Tests
+### 2. Run Tests
 
 ```bash
 # All tests
 npm test
 
-# Unit tests with watch mode
-npm run test:unit:watch
+# Type check
+npm run typecheck
 
-# With coverage
-npm run test:coverage
+# Lint
+npm run lint
 ```
 
-### Type Checking
+### 3. Test WASM
 
 ```bash
+cd src/rust-wasm
+wasm-pack test --headless --firefox
+```
+
+## First Search
+
+Try these searches in the UI:
+- "funny sci-fi movies like The Martian"
+- "relaxing shows for a quiet evening"
+- "action movies from 2020"
+
+## Troubleshooting
+
+### Port Already in Use
+
+```bash
+# Kill process on port 3000
+lsof -ti:3000 | xargs kill -9
+
+# Kill process on port 5173
+lsof -ti:5173 | xargs kill -9
+```
+
+### Database Connection Error
+
+```bash
+# Check PostgreSQL is running
+pg_isready
+
+# Verify connection
+psql -U postgres -d meta_media_search -c "SELECT 1"
+```
+
+### Redis Connection Error
+
+```bash
+# Check Redis is running
+redis-cli ping
+# Should return: PONG
+```
+
+### WASM Build Errors
+
+```bash
+# Update Rust
+rustup update
+
+# Clean and rebuild
+cd src/rust-wasm
+cargo clean
+wasm-pack build --release --target web
+```
+
+### Node.js Version Issues
+
+```bash
+# Switch to Node 20 LTS
+nvm install 20
+nvm use 20
+
+# Clean install
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## Development Workflow
+
+### Hot Reload
+
+Both backend and frontend have hot reload enabled:
+- Backend watches `src/backend/**`
+- Frontend watches `src/frontend/**`
+
+### Code Quality
+
+```bash
+# Format code
+npm run format
+
+# Lint and fix
+npm run lint:fix
+
+# Type check
 npm run typecheck
 ```
 
-### Linting
+### Git Workflow
 
 ```bash
-# Check for issues
-npm run lint
+# Create feature branch
+git checkout -b feature/my-feature
 
-# Auto-fix issues
-npm run lint:fix
+# Commit frequently
+git add .
+git commit -m "feat: Add my feature"
+
+# Push to remote
+git push origin feature/my-feature
 ```
 
 ## Next Steps
 
-Once everything is running:
+- Read [API Documentation](api/API_DOCUMENTATION.md)
+- Explore [Architecture](ARCHITECTURE.md)
+- Check [RuVector Integration](vector-db/ruvector-research.md)
+- Learn about [AgentDB](vector-db/agentdb-integration.md)
 
-1. **Read the [API Documentation](api/API_DOCUMENTATION.md)** to understand available endpoints
-2. **Explore the [Architecture](architecture/ARCHITECTURE.md)** to understand how the system works
-3. **Try different searches** to see the AI-powered query processing
-4. **Explore the visual discovery map** - click nodes, zoom, and pan
+## Common Tasks
 
-## Need Help?
+### Add New API Endpoint
 
-- Check the [README](../README.md) for more information
-- Review [API Documentation](api/API_DOCUMENTATION.md)
-- Open an issue on [GitHub](https://github.com/michaelcolletti/meta-media-search/issues)
+1. Create route in `src/backend/routes/`
+2. Create controller in `src/backend/controllers/`
+3. Create service in `src/backend/services/`
+4. Add tests
+5. Update API docs
 
-## Tips for Development
+### Add WASM Module
 
-- **Hot Reload**: Both frontend and backend support hot reload during development
-- **Database Seeding**: Use `npm run seed` to populate with sample data
-- **API Testing**: Use Postman, Insomnia, or curl to test API endpoints
-- **Browser DevTools**: Use React DevTools and Network tab for debugging
+1. Create Rust module in `src/rust-wasm/src/`
+2. Add WASM bindings
+3. Build with `wasm-pack`
+4. Import in TypeScript
+5. Add tests
+
+### Update Frontend Component
+
+1. Edit component in `src/frontend/components/`
+2. Update styles in corresponding `.css`
+3. Add tests in `tests/frontend/`
+4. Verify hot reload works
+
+## Getting Help
+
+- Check [Documentation](../)
+- Open [GitHub Issue](https://github.com/michaelcolletti/meta-media-search/issues)
+- Read [FAQ](FAQ.md)
 
 Happy coding! 🚀
