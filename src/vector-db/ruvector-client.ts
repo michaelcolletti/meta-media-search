@@ -68,6 +68,16 @@ export class RuVectorClient {
     this.vectors.clear();
   }
 
+  /** Check connection status */
+  isConnected(): boolean {
+    return this.initialized;
+  }
+
+  /** List collections */
+  async listCollections(): Promise<string[]> {
+    return this.initialized ? ['default'] : [];
+  }
+
   /**
    * Insert a vector with metadata
    */
