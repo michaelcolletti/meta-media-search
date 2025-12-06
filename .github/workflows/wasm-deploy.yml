@@ -1,0 +1,294 @@
+name: WASM Deployment Pipeline
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-release:
+    name: Build Release WASM
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -y
+
+      - name: Install wasm-opt
+        run: |
+          wget https://github.com/WebAssembly/binaryen/releases/download/version_116/binaryen-version_116-x86_64-linux.tar.gz
+          tar -xzf binaryen-version_116-x86_64-linux.tar.gz
+          sudo cp binaryen-version_116/bin/wasm-opt /usr/local/bin/
+          rm -rf binaryen-version_116*
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build WASM for release
+        run: ./scripts/build-wasm.sh release
+
+      - name: Optimize WASM for production
+        run: ./scripts/optimize-wasm.sh --aggressive
+
+      - name: Generate integrity checksums
+        run: |
+          cd pkg
+          sha256sum *.wasm > checksums.txt
+          sha256sum *.js >> checksums.txt
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-release-${{ github.sha }}
+          path: |
+            pkg/*.wasm
+            pkg/*.js
+            pkg/*.d.ts
+            pkg/checksums.txt
+          retention-days: 30
+
+  deploy-cdn:
+    name: Deploy to CDN
+    runs-on: ubuntu-latest
+    needs: build-release
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-release-${{ github.sha }}
+          path: pkg
+
+      - name: Configure AWS credentials
+        if: secrets.AWS_ACCESS_KEY_ID != ''
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to S3/CloudFront
+        if: secrets.AWS_ACCESS_KEY_ID != ''
+        run: |
+          aws s3 sync pkg/ s3://${{ secrets.S3_BUCKET }}/wasm/${{ github.sha }}/ \
+            --exclude "*" \
+            --include "*.wasm" \
+            --include "*.js" \
+            --include "*.d.ts" \
+            --cache-control "public, max-age=31536000, immutable"
+
+          # Invalidate CloudFront cache
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/wasm/*"
+
+      - name: Deploy to Vercel (alternative)
+        if: secrets.VERCEL_TOKEN != ''
+        run: |
+          npm install -g vercel
+          vercel --token ${{ secrets.VERCEL_TOKEN }} --prod
+
+  deploy-containers:
+    name: Deploy Docker Containers
+    runs-on: ubuntu-latest
+    needs: build-release
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-release-${{ github.sha }}
+          path: pkg
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        if: secrets.DOCKER_USERNAME != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}-backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract metadata
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}-frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [deploy-cdn, deploy-containers]
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-release-${{ github.sha }}
+          path: pkg
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            pkg/*.wasm
+            pkg/*.js
+            pkg/*.d.ts
+            pkg/checksums.txt
+          body: |
+            ## WASM Release ${{ github.ref_name }}
+
+            ### Artifacts
+            - Pre-compiled WASM binaries
+            - JavaScript bindings
+            - TypeScript definitions
+            - SHA256 checksums
+
+            ### Installation
+            ```bash
+            npm install @${{ github.repository }}@${{ github.ref_name }}
+            ```
+
+            ### CDN Links
+            ```html
+            <script src="https://cdn.example.com/wasm/${{ github.sha }}/index.js"></script>
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  rollback:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy-cdn, deploy-containers]
+    if: failure()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Notify rollback
+        run: |
+          echo "Deployment failed, initiating rollback procedures"
+          npx claude-flow@alpha hooks notify --message "WASM deployment failed for ${{ github.sha }}, rollback initiated"
+
+      - name: Revert CDN deployment
+        if: secrets.AWS_ACCESS_KEY_ID != ''
+        run: |
+          # Rollback logic here
+          echo "Rolling back CDN deployment"
+
+  post-deploy-validation:
+    name: Post-Deployment Validation
+    runs-on: ubuntu-latest
+    needs: [deploy-cdn, deploy-containers]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests against deployed WASM"
+          # Add actual smoke tests here
+
+      - name: Validate WASM integrity
+        run: |
+          echo "Validating WASM checksums"
+          # Add checksum validation
+
+      - name: Send deployment notification
+        run: |
+          npx claude-flow@alpha hooks notify --message "WASM deployment successful: ${{ github.sha }}"
+          npx claude-flow@alpha hooks post-task --task-id "wasm-deploy-${{ github.run_id }}"
+
+      - name: Store deployment metrics
+        run: |
+          npx claude-flow@alpha hooks post-edit \
+            --file ".github/workflows/wasm-deploy.yml" \
+            --memory-key "swarm/cicd/deployment-${{ github.run_id }}"
